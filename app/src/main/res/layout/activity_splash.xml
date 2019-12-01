@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#CA4747"
+    android:padding="10dp"
+    tools:context=".SplashActivity">
+
+    <ImageView
+        android:transitionName="icon"
+        android:id="@+id/splash_image_icon"
+        android:contentDescription="@string/app_name"
+        android:scaleType="fitXY"
+        android:layout_width="180dp"
+        android:layout_height="130dp"
+        android:src="@mipmap/app_logo"
+        android:layout_centerInParent="true"
+        tools:targetApi="lollipop" />
+
+    <LinearLayout
+        android:id="@+id/splash_linear_bubble_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/splash_image_icon">
+    <include
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        layout="@layout/text_bubble_splash" />
+    </LinearLayout>
+
+    <TextView
+        android:textSize="15sp"
+        android:textColor="#ffffff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/version_1_0_1"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"/>
+
+
+</RelativeLayout>
