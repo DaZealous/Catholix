@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="10dp"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="140dp"
+    android:layout_height="200dp"
     android:background="@color/colorPrimary">
 
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:layout_above="@+id/nav_header_username"
+        android:id="@+id/nav_header_image_profile"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/ic_person_profile_24dp"
+       />
+
     <TextView
+        android:layout_marginStart="10dp"
         android:id="@+id/nav_header_username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="25sp"
-        android:text="Zeal"
+        android:text=""
         android:layout_alignParentBottom="true"
         android:textStyle="bold"
         android:textColor="#ffffff"/>

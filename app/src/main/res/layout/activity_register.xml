@@ -35,6 +35,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             <EditText
+                android:id="@+id/activity_register_first_name"
                 android:padding="16dp"
                 android:background="@drawable/edit_drawable2"
                 android:layout_marginStart="10dp"
@@ -45,9 +46,10 @@
                 android:inputType="textPersonName"
                 android:textColorHint="#ffffff"
                 android:textColor="#ffffff"
-                android:hint="Full name"/>
+                android:hint="First Name"/>
 
             <EditText
+                android:id="@+id/activity_register_last_name"
                 android:padding="16dp"
                 android:textColorHint="#ffffff"
                 android:textColor="#ffffff"
@@ -58,11 +60,47 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-
-                android:hint="Username"/>
+                android:hint="Last Name"/>
         </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
         <EditText
+            android:id="@+id/activity_register_user_name"
+            android:layout_marginTop="16dp"
+            android:padding="16dp"
+            android:background="@drawable/edit_drawable2"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:textColorHint="#ffffff"
+            android:textColor="#ffffff"
+            android:hint="Username"/>
+
+        <EditText
+            android:id="@+id/activity_register_phone"
+            android:layout_marginTop="16dp"
+            android:padding="16dp"
+            android:background="@drawable/edit_drawable2"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:inputType="phone"
+            android:textColorHint="#ffffff"
+            android:textColor="#ffffff"
+            android:hint="Phone Number"/>
+    </LinearLayout>
+
+        <EditText
+            android:id="@+id/activity_register_email_address"
             android:layout_marginTop="16dp"
             android:padding="16dp"
             android:textColorHint="#ffffff"
@@ -75,21 +113,16 @@
             android:inputType="textEmailAddress"
             android:hint="Email Address"/>
 
-        <EditText
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_marginTop="16dp"
-            android:padding="16dp"
-            android:background="@drawable/edit_drawable2"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="phone"
-            android:textColorHint="#ffffff"
-            android:textColor="#ffffff"
-            android:hint="Phone Number"/>
-
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="@color/white"
+            app:hintEnabled="false"
+            android:textColorHint="@color/white">
         <EditText
-            android:layout_marginTop="16dp"
+            android:id="@+id/activity_register_password"
             android:padding="16dp"
             android:background="@drawable/edit_drawable2"
             android:layout_marginStart="10dp"
@@ -100,9 +133,18 @@
             android:textColorHint="#ffffff"
             android:textColor="#ffffff"
             android:hint="Password"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <EditText
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="@color/white"
+            app:hintEnabled="false"
+            android:textColorHint="@color/white">
+        <EditText
+            android:id="@+id/activity_register_retype_password"
             android:padding="16dp"
             android:background="@drawable/edit_drawable2"
             android:layout_marginStart="10dp"
@@ -113,8 +155,10 @@
             android:textColorHint="#ffffff"
             android:textColor="#ffffff"
             android:hint="Retype Password"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <Button
+            android:id="@+id/activity_register_btn_submit"
             android:textColor="#ffffff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -29,6 +29,7 @@ import java.util.Map;
 
 import Service.LoginService;
 import api.VolleyInstance;
+import config.SharedPref;
 import presenter.LoginPresenter;
 import view.LoginView;
 
@@ -99,7 +100,11 @@ public class LoginActivity extends AppCompatActivity implements LoginView, View.
 
     @Override
     public void startMainActivity() {
-        startActivity(new Intent(this, MainActivity.class));
+        try {
+            startActivity(new Intent(this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK));
+        } catch (Exception e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

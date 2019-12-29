@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:layout_marginBottom="10dp"
+    app:cardCornerRadius="10dp">
+<LinearLayout
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:padding="10dp"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/feeds_layout_profile_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/feeds_layout_image_profile"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_person_profile_24dp"
+            app:civ_border_color="@color/colorPrimaryDark"
+            app:civ_border_width="1dp"/>
+
+        <TextView
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_toEndOf="@+id/feeds_layout_image_profile"
+            android:textColor="#000000"
+            android:id="@+id/feeds_layout_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="10dp"
+            android:text="Username" />
+
+        <TextView
+            android:textSize="13sp"
+            android:layout_marginTop="5dp"
+            android:layout_below="@id/feeds_layout_username"
+            android:layout_toEndOf="@+id/feeds_layout_image_profile"
+            android:textColor="#000000"
+            android:id="@+id/feeds_layout_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="10dp"
+            android:text="Time" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:gravity="start"
+        android:textSize="15sp"
+        android:layout_marginTop="5dp"
+        android:textColor="#000000"
+        android:id="@+id/feeds_layout_post_caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:maxLines="5"
+        android:text="lkffjdkfhkdsfhkdhfldsjfklsdhfd;jfkdhfkdfhkdhfkdshfkdhfeiwrkfdkfhiewfhdvnvhkdsfkifh,ifhekjdiufewfkdviojreoiruodklfkdhfkjfljf;lajljdslfkjfhfsf;dff'f'dsfjl;dsjf;e''dsfsd;fwejfldivhknv,dnioufljdjls" />
+
+    <TextView
+        android:gravity="start"
+        android:textSize="15sp"
+        android:layout_marginTop="5dp"
+        android:id="@+id/feeds_layout_continue_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:text="see more"/>
+
+    <ImageView
+        android:scaleType="fitXY"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/feeds_layout_post_image"/>
+
+    <EditText
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="comment"
+        android:background="@drawable/edit_post_back_comment"
+        android:padding="10dp"/>
+
+    <Button
+        android:textStyle="bold"
+        android:textColor="#ffffff"
+        android:textSize="15sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Post"
+        android:layout_gravity="end"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/edit_post_comment_draw"
+        style="?android:attr/buttonBarStyle"/>
+
+</LinearLayout>
+</androidx.cardview.widget.CardView>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    tools:context=".PostView">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/Widget.Design.AppBarLayout"
+        android:id="@+id/postViewToolbarLayout">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize">
+
+        <androidx.appcompat.widget.Toolbar
+            style="@style/Widget.AppCompat.Toolbar"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            android:id="@+id/postViewToolbar"
+            android:background="#ffffff"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"/>
+
+            <ImageButton
+                android:layout_marginTop="5dp"
+                android:background="@android:color/transparent"
+                android:layout_marginStart="10dp"
+                android:id="@+id/post_view_btn_close"
+                android:layout_centerVertical="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_close_black_24dp"/>
+
+            <TextView
+                android:textColor="#000000"
+                android:layout_marginStart="10dp"
+                android:layout_toEndOf="@+id/post_view_btn_close"
+                android:layout_centerVertical="true"
+                android:gravity="start"
+                android:textSize="18sp"
+                android:layout_marginTop="5dp"
+                android:id="@+id/post_view_app_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:text="continue"/>
+
+        </RelativeLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ScrollView
+        android:layout_below="@+id/postViewToolbarLayout"
+        android:layout_above="@+id/post_view_comment_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:scrollbars="none">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+    <LinearLayout
+        android:id="@+id/post_view_linear_layout"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:padding="10dp"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/post_view_profile_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/post_view_image_profile"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/ic_person_profile_24dp"
+                app:civ_border_color="@color/colorPrimaryDark"
+                app:civ_border_width="1dp"/>
+
+            <TextView
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_toEndOf="@+id/post_view_image_profile"
+                android:textColor="#000000"
+                android:id="@+id/post_view_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="10dp"
+                android:text="Username" />
+
+            <TextView
+                android:textSize="13sp"
+                android:layout_marginTop="5dp"
+                android:layout_below="@id/post_view_username"
+                android:layout_toEndOf="@+id/post_view_image_profile"
+                android:textColor="#000000"
+                android:id="@+id/post_view_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="10dp"
+                android:text="Time" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:gravity="start"
+            android:textSize="15sp"
+            android:layout_marginTop="5dp"
+            android:textColor="#000000"
+            android:id="@+id/post_view_post_caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:text="lkffjdkfhkdsfhkdhfldsjfklsdhfd;jfkdhfkdfhkdhfkdshfkdhfeiwrkfdkfhiewfhdvnvhkdsfkifh,ifhekjdiufewfkdviojreoiruodklfkdhfkjfljf;lajljdslfkjfhfsf;dff'f'dsfjl;dsjf;e''dsfsd;fwejfldivhknv,dnioufljdjls" />
+
+        <TextView
+            android:gravity="start"
+            android:textSize="15sp"
+            android:layout_marginTop="5dp"
+            android:id="@+id/post_view_see_less_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:text="see less"/>
+
+        <ImageView
+            android:scaleType="fitXY"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/post_view_post_image"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorAccent"
+        android:layout_below="@id/post_view_linear_layout"/>
+
+        </RelativeLayout>
+    </ScrollView>
+<LinearLayout
+    android:id="@+id/post_view_comment_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_alignParentBottom="true"
+    android:padding="10dp">
+
+    <EditText
+        android:textSize="15sp"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="comment"
+        android:background="@drawable/edit_post_back_comment"
+        android:padding="15dp"/>
+
+    <Button
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="10dp"
+        android:textStyle="bold"
+        android:textColor="#ffffff"
+        android:textSize="15sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Post"
+        android:background="@drawable/edit_post_comment_draw"
+        style="?android:attr/buttonBarStyle"/>
+</LinearLayout>
+</RelativeLayout>

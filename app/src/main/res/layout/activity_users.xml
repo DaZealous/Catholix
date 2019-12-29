@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".UsersActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/Widget.Design.AppBarLayout"
+        android:id="@+id/usersToolbarLayout">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize">
+
+            <androidx.appcompat.widget.Toolbar
+                style="@style/Widget.AppCompat.Toolbar"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                android:id="@+id/postViewToolbar"
+                android:background="@color/colorPrimary"
+                android:layout_width="match_parent"
+                android:layout_height="?android:attr/actionBarSize"/>
+
+            <ImageButton
+                android:layout_marginStart="10dp"
+                android:id="@+id/activity_user_back_btn"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_arrow_back_white_24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true" />
+
+            <EditText
+                android:inputType="text"
+                android:paddingStart="30dp"
+                android:layout_toEndOf="@+id/activity_user_back_btn"
+                android:backgroundTint="@color/colorPrimary"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
+                android:layout_marginEnd="10dp"
+                android:layout_centerVertical="true"
+                android:gravity="start"
+                android:textSize="18sp"
+                android:layout_marginTop="5dp"
+                android:id="@+id/activity_user_search_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="search here"/>
+
+            <ImageButton
+                android:visibility="invisible"
+                android:layout_marginTop="5dp"
+                android:id="@+id/activity_user_clear_search"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_close_white_24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="10dp"/>
+        </RelativeLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        android:id="@+id/users_activity_swipe_refresh"
+        android:layout_below="@+id/usersToolbarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/users_activity_recycler_view"/>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+
+</RelativeLayout>

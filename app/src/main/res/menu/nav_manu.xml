@@ -9,6 +9,10 @@
         android:icon="@drawable/ic_person_pin_black_24dp"
         android:title="Profile" />
     <item
+        android:icon="@drawable/ic_person_black_24dp"
+        android:id="@+id/nav_menu_users"
+        android:title="Users"/>
+    <item
         android:id="@+id/nav_menu_chats"
         android:icon="@drawable/ic_chat_black_24dp"
         android:title="Chats" />
@@ -16,4 +20,8 @@
         android:id="@+id/nav_menu_settings"
         android:icon="@drawable/ic_settings_black_24dp"
         android:title="Settings" />
+    <item
+        android:icon="@drawable/ic_backspace_black_24dp"
+        android:id="@+id/nav_menu_logout"
+        android:title="Log Out"/>
 </menu>

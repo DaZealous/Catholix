@@ -9,6 +9,8 @@ import android.os.Handler;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 
+import config.SharedPref;
+
 public class SplashActivity extends AppCompatActivity {
 
     Handler handler;
@@ -24,10 +26,17 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void run() {
                 layout.clearAnimation();
-                ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(SplashActivity.this,
-                        findViewById(R.id.splash_image_icon), "icon");
-                startActivity(new Intent(SplashActivity.this, WelcomeActivity.class), optionsCompat.toBundle());
-                supportFinishAfterTransition();
+               /* ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(SplashActivity.this,
+                        findViewById(R.id.splash_image_icon), "icon");*/
+               if(SharedPref.getInstance(SplashActivity.this).getUser().isEmpty()){
+                   startActivity(new Intent(SplashActivity.this, WelcomeActivity.class));
+                   finish();
+               }
+               else{
+                   startActivity(new Intent(SplashActivity.this, MainActivity.class));
+                   finish();
+               }
+
             }
         }, 3500);
     }

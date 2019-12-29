@@ -7,15 +7,36 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.bumptech.glide.Glide;
 import com.google.android.material.navigation.NavigationView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Objects;
+
+import api.VolleyInstance;
+import config.SharedPref;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -23,6 +44,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     DrawerLayout layout;
     NavigationView navigationView;
     ActionBarDrawerToggle toggle;
+    String email, name, image;
+    TextView navTitle;
+    CircleImageView profileImage;
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +54,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        email = SharedPref.getInstance(this).getEmail();
+        name = SharedPref.getInstance(this).getUser();
+        image = SharedPref.getInstance(this).getImage();
         layout = findViewById(R.id.main_drawer_layout);
         navigationView = findViewById(R.id.main_navigation_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -37,11 +64,98 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         layout.addDrawerListener(toggle);
         toggle.syncState();
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getData();
+        getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_navigation, new NewsFeed()).commit();
+        layout.setDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(@NonNull View drawerView) {
+                navTitle = findViewById(R.id.nav_header_username);
+                profileImage = findViewById(R.id.nav_header_image_profile);
+                navTitle.setText(name);
+                Glide.with(MainActivity.this).load("https://www.catholix.com.ng/files/images/profilepics/"+image).placeholder(R.drawable.ic_person_profile_24dp).into(profileImage);
+            }
+
+            @Override
+            public void onDrawerClosed(@NonNull View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
+
+    }
+
+    private void getData() {
+        try {
+            if(isInternetAvailable(this)) {
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, "https://www.catholix.com.ng/api.developer/GET/req.php?qdata=more&table=users&dataz=email&valuez=" + email,
+                        null,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject object) {
+                                try {
+                                    name = object.getString("Fname") + " " + object.getString("Sname");
+                                    image = object.getString("Photo");
+                                    SharedPref.getInstance(MainActivity.this).addPhoto(image);
+                                } catch (JSONException e) {
+                                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                VolleyInstance.getInstance(this).addToQueue(request);
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private static boolean isInternetAvailable(Context context){
+        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        return manager.getActiveNetworkInfo() != null
+                && manager.getActiveNetworkInfo().isAvailable()
+                && manager.getActiveNetworkInfo().isConnectedOrConnecting();
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        return false;
+        int id = item.getItemId();
+        switch (id){
+            case R.id.nav_menu_news_feed:
+                getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_navigation, new NewsFeed()).commit();
+                layout.closeDrawer(GravityCompat.START);
+                return true;
+            case R.id.nav_menu_chats:
+                return false;
+            case R.id.nav_menu_profile:
+                return false;
+            case R.id.nav_menu_settings:
+                return false;
+            case R.id.nav_menu_logout:
+                layout.closeDrawer(GravityCompat.START);
+                SharedPref.getInstance(this).removeUser();
+                startActivity(new Intent(this, WelcomeActivity.class));
+                finish();
+            case R.id.nav_menu_users:
+                startActivity(new Intent(this, UsersActivity.class));
+                layout.closeDrawer(GravityCompat.START);
+                return true;
+                default:
+                    return false;
+        }
     }
 
     @Override

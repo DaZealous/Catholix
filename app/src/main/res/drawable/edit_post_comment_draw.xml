@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid
+        android:color="#924141"/>
+    <corners
+        android:radius="10dp"/>
+<!--    https://stackoverflow.com/questions/11285961/how-to-make-a-background-20-transparent-on-android-->
+</shape>
