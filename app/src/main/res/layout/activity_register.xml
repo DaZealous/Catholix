@@ -84,6 +84,7 @@
             android:hint="Username"/>
 
         <EditText
+            android:maxLength="11"
             android:id="@+id/activity_register_phone"
             android:layout_marginTop="16dp"
             android:padding="16dp"

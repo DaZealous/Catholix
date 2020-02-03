@@ -26,4 +26,7 @@ public class LoginPresenter {
         loginService.doLogin(loginView.getUsername(), loginView.getPassword(), loginView);
     }
 
+    public void onForgetPasswordClicked() {
+        loginService.doForgetPassword(loginView);
+    }
 }

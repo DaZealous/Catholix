@@ -1,45 +1,45 @@
 package www.catholix.com.ng;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.util.Patterns;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 
 import Service.LoginService;
-import api.VolleyInstance;
-import config.SharedPref;
 import presenter.LoginPresenter;
 import view.LoginView;
 
 public class LoginActivity extends AppCompatActivity implements LoginView, View.OnClickListener {
 
-    TextView register;
+    TextView register, forgotPasswordText;
     LoginPresenter presenter;
-    EditText editUser, editPass;
-    Button btnLogin;
+    EditText editUser, editPass, editEmail;
+    Button btnLogin, btnSubmit, btnGotIt;
     ProgressDialog dialog;
+    RelativeLayout emailSuccessLayout, forgotPasswordLayout, bubblesLayout;
+    ImageButton btnCloseLayout;
+    Animation slideRight;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +54,51 @@ public class LoginActivity extends AppCompatActivity implements LoginView, View.
         initUI();
         btnLogin.setOnClickListener(this);
         register.setOnClickListener(this);
+        btnSubmit.setOnClickListener(this);
+        forgotPasswordText.setOnClickListener(this);
+        btnCloseLayout.setOnClickListener(this);
+        btnGotIt.setOnClickListener(this);
+
+        slideRight.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                forgotPasswordLayout.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+        editEmail.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if(!TextUtils.isEmpty(charSequence.toString()))
+                    if(Patterns.EMAIL_ADDRESS.matcher(charSequence.toString()).matches()){
+                        btnSubmit.setAlpha(1f);
+                        btnSubmit.setEnabled(true);
+                    }else{
+                        btnSubmit.setAlpha(0.3f);
+                        btnSubmit.setEnabled(false);
+                    }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
     }
 
     private void initUI() {
@@ -61,6 +106,15 @@ public class LoginActivity extends AppCompatActivity implements LoginView, View.
         editPass = findViewById(R.id.login_edit_password);
         editUser = findViewById(R.id.login_edit_username);
         btnLogin = findViewById(R.id.login_btn_submit);
+        btnSubmit = findViewById(R.id.forgot_password_layout_btn_submit);
+        btnGotIt = findViewById(R.id.email_sent_success_dialogue_btn_got_it);
+        btnCloseLayout = findViewById(R.id.forgot_password_layout_btn_cancel);
+        emailSuccessLayout = findViewById(R.id.email_sent_success_dialogue_black_layout);
+        forgotPasswordLayout = findViewById(R.id.forgot_password_layout_relative_layout_black);
+        editEmail = findViewById(R.id.forgot_pass_layout_edit_text);
+        bubblesLayout = findViewById(R.id.forgot_password_layout_loader_bubble);
+        forgotPasswordText = findViewById(R.id.forgot_password_text);
+        slideRight = AnimationUtils.loadAnimation(this, R.anim.slide_right2);
     }
 
     private void checkVersion() {
@@ -112,6 +166,35 @@ public class LoginActivity extends AppCompatActivity implements LoginView, View.
         Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public String getForgetEmail() {
+        return editEmail.getText().toString();
+    }
+
+    @Override
+    public void showForgetEmailError(String error) {
+        btnSubmit.setVisibility(View.VISIBLE);
+        bubblesLayout.setVisibility(View.INVISIBLE);
+        bubblesLayout.clearAnimation();
+        Snackbar.make(forgotPasswordLayout, error, Snackbar.LENGTH_SHORT)
+                .setAction("OK", null).show();
+    }
+
+    @Override
+    public void startEmailRecovery() {
+        btnSubmit.setVisibility(View.INVISIBLE);
+        bubblesLayout.setVisibility(View.VISIBLE);
+        bubblesLayout.startAnimation(AnimationUtils.loadAnimation(this, R.anim.my_anim));
+    }
+
+    @Override
+    public void showForgetEmailSuccess() {
+        emailSuccessLayout.setVisibility(View.VISIBLE);
+        btnSubmit.setVisibility(View.VISIBLE);
+        bubblesLayout.setVisibility(View.INVISIBLE);
+        bubblesLayout.clearAnimation();
+    }
+
 
     @Override
     public void onClick(View view) {
@@ -120,8 +203,19 @@ public class LoginActivity extends AppCompatActivity implements LoginView, View.
             startActivity(new Intent(LoginActivity.this, Register.class));
             finish();
         }
-        if (id == R.id.login_btn_submit) {
+        if (id == R.id.login_btn_submit)
             presenter.onLoginClicked();
+        if(id == R.id.forgot_password_layout_btn_submit)
+            presenter.onForgetPasswordClicked();
+        if(id == R.id.forgot_password_text){
+            forgotPasswordLayout.setVisibility(View.VISIBLE);
+            forgotPasswordLayout.startAnimation(AnimationUtils.loadAnimation(this, R.anim.card_slide_left2));
+        }
+        if(id == R.id.forgot_password_layout_btn_cancel)
+            forgotPasswordLayout.startAnimation(slideRight);
+        if(id == R.id.email_sent_success_dialogue_btn_got_it){
+            emailSuccessLayout.setVisibility(View.INVISIBLE);
+            forgotPasswordLayout.startAnimation(slideRight);
         }
     }
 }

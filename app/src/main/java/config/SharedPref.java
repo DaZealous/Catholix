@@ -27,11 +27,13 @@ public class SharedPref {
         return instance;
     }
 
-    public void addUser(String username, String email, String image){
+    public void addUser(String username, String email, String image, String _id){
         SharedPreferences.Editor editor = getPref().edit();
         editor.putString("username", username);
         editor.putString("email", email);
         editor.putString("image", image);
+        editor.putString("_id", _id);
+
         editor.apply();
     }
 
@@ -53,6 +55,10 @@ public class SharedPref {
 
     public String getImage(){
         return getPref().getString("image", "");
+    }
+
+    public String getId(){
+        return getPref().getString("_id", "");
     }
 
     public void removeUser(){

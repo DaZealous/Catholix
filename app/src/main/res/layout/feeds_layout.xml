@@ -7,6 +7,7 @@
     android:clickable="true"
     android:foreground="?android:attr/selectableItemBackground"
     android:layout_marginBottom="10dp"
+    android:background="@color/white"
     app:cardCornerRadius="10dp">
 <LinearLayout
     android:orientation="vertical"
@@ -56,8 +57,9 @@
     </RelativeLayout>
 
     <TextView
+        android:fontFamily="@font/rokkitt_regular"
         android:gravity="start"
-        android:textSize="15sp"
+        android:textSize="17sp"
         android:layout_marginTop="5dp"
         android:textColor="#000000"
         android:id="@+id/feeds_layout_post_caption"
@@ -84,25 +86,33 @@
         android:layout_height="wrap_content"
         android:id="@+id/feeds_layout_post_image"/>
 
-    <EditText
-        android:layout_marginTop="10dp"
+    <VideoView
+        android:visibility="gone"
+        android:id="@+id/feeds_layout_videos_viewer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="comment"
-        android:background="@drawable/edit_post_back_comment"
-        android:padding="10dp"/>
+        />
 
-    <Button
-        android:textStyle="bold"
-        android:textColor="#ffffff"
-        android:textSize="15sp"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Post"
-        android:layout_gravity="end"
-        android:layout_marginTop="5dp"
-        android:background="@drawable/edit_post_comment_draw"
-        style="?android:attr/buttonBarStyle"/>
+        android:orientation="horizontal">
+        <ImageView
+            android:src="@drawable/ic_favorite_border_black_24dp"
+            android:scaleType="fitXY"
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/feeds_layout_post_like_icon"/>
 
+        <ImageView
+            android:layout_marginStart="35dp"
+            android:src="@drawable/ic_comment_black_24dp"
+            android:scaleType="fitXY"
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/feeds_layout_post_comment_icon"/>
+    </LinearLayout>
 </LinearLayout>
 </androidx.cardview.widget.CardView>

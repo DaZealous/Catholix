@@ -13,10 +13,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+        <activity android:name=".NotificationActivity"></activity>
         <activity
             android:name=".FriendsProfile"
             android:label="@string/title_activity_friends_profile"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".UsersActivity" />
         <activity android:name=".PostView" />
         <activity

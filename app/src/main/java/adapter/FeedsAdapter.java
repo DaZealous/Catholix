@@ -2,12 +2,16 @@ package adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,6 +26,7 @@ import com.bumptech.glide.request.RequestOptions;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.List;
 
 import api.VolleyInstance;
@@ -56,10 +61,19 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.viewHolder>{
         holder.textCaption.setText(android.text.Html.fromHtml(feed.getMessage()));
         if(feed.getPhoto() == null){
             holder.feedImage.setVisibility(View.GONE);
+            holder.videoView.setVisibility(View.GONE);
         }else {
-            Glide.with(context).load("https://www.catholix.com.ng/files/images/feeds/" + feed.getPhoto())
-                    .apply(new RequestOptions().override(500, 500)).into(holder.feedImage);
-            holder.feedImage.setVisibility(View.VISIBLE);
+            if(holder.isVideo(feed.getPhoto())){
+                holder.feedImage.setVisibility(View.GONE);
+                holder.videoView.setVisibility(View.VISIBLE);
+                holder.playVideo("https://www.catholix.com.ng/files/images/feeds/" + feed.getPhoto());
+                }else {
+                Glide.with(context).load("https://www.catholix.com.ng/files/images/feeds/" + feed.getPhoto())
+                        .apply(new RequestOptions().override(500, 500)).into(holder.feedImage);
+                holder.feedImage.setVisibility(View.VISIBLE);
+                holder.videoView.setVisibility(View.GONE);
+
+            }
         }
        holder.getData(feed.getUserId());
         holder.textContinue.setOnClickListener(new View.OnClickListener() {
@@ -88,6 +102,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.viewHolder>{
         TextView textCaption;
         ImageView feedImage;
         TextView textContinue;
+        VideoView videoView;
         private viewHolder(@NonNull View itemView) {
             super(itemView);
             textUsername = itemView.findViewById(R.id.feeds_layout_username);
@@ -96,7 +111,21 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.viewHolder>{
             imgProfile = itemView.findViewById(R.id.feeds_layout_image_profile);
             feedImage = itemView.findViewById(R.id.feeds_layout_post_image);
             textContinue = itemView.findViewById(R.id.feeds_layout_continue_text);
+            videoView = itemView.findViewById(R.id.feeds_layout_videos_viewer);
         }
+
+        private boolean isImage(String file) {
+            return file.endsWith(".jpg") ||
+                    file.endsWith(".png") ||
+                    file.endsWith(".gif") ||
+                    file.endsWith(".jpeg") ||
+                    file.endsWith("jpg") ||
+                    file.endsWith("png") ||
+                    file.endsWith("gif") ||
+                    file.endsWith("jpeg");
+        }
+
+
 
         private void getData(String id) {
             try {
@@ -125,5 +154,22 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.viewHolder>{
             }
         }
 
+        private void playVideo(String photo) {
+            Toast.makeText(context, photo, Toast.LENGTH_SHORT).show();
+            videoView.setVideoURI(Uri.parse(photo));
+           // MediaController controller = new MediaController(context);
+            //controller.setAnchorView(videoView);
+                //controller.setVisibility(View.INVISIBLE);
+            //videoView.setMediaController(controller);
+            videoView.start();
+            //videoView.setOnPreparedListener(mediaPlayer -> {
+              //  videoView.seekTo(0);
+                //    videoView.start();
+            //});
+        }
+
+        private boolean isVideo(String photo) {
+            return photo.endsWith(".mp4");
+        }
     }
 }

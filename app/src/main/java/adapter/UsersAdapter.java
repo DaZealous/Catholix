@@ -22,7 +22,7 @@ import model.Users;
 import www.catholix.com.ng.FriendsProfile;
 import www.catholix.com.ng.R;
 
-public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.viewHolder>{
+public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.viewHolder> {
     private Context context;
     private List<Users> list;
 
@@ -43,22 +43,22 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.viewHolder>{
     public void onBindViewHolder(@NonNull final viewHolder holder, int position) {
         final Users users = list.get(position);
         holder.textView.setText(holder.getName(users.getFirstname(), users.getSurname()));
-        Glide.with(context).load("https://www.catholix.com.ng/files/images/profilepics/"+users.getPhoto()).placeholder(R.drawable.ic_person_profile_24dp).into(holder.imageView);
+        Glide.with(context).load("https://www.catholix.com.ng/files/images/profilepics/" + users.getPhoto()).placeholder(R.drawable.ic_person_profile_24dp).into(holder.imageView);
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context,
                         holder.imageView, "profileImg");
                 context.startActivity(new Intent(context, FriendsProfile.class)
-                        .putExtra("id", users.getUserId())
-                        .putExtra("fullname", holder.getName(users.getFirstname(), users.getSurname()))
-                .putExtra("username", holder.getOtherName(users.getUsername()))
-                .putExtra("photo", holder.getOtherName(users.getPhoto()))
-                .putExtra("phone", holder.getOtherName(users.getPhone()))
-                .putExtra("country", holder.getOtherName(users.getCountry()))
-                .putExtra("email", holder.getOtherName(users.getEmail()))
-                        .putExtra("state", holder.getOtherName(users.getState()))
-                        .putExtra("gender", holder.getOtherName(users.getGender())),
+                                .putExtra("id", users.getUserId())
+                                .putExtra("fullname", holder.getName(users.getFirstname(), users.getSurname()))
+                                .putExtra("username", holder.getOtherName(users.getUsername()))
+                                .putExtra("photo", holder.getOtherName(users.getPhoto()))
+                                .putExtra("phone", holder.getOtherName(users.getPhone()))
+                                .putExtra("country", holder.getOtherName(users.getCountry()))
+                                .putExtra("email", holder.getOtherName(users.getEmail()))
+                                .putExtra("state", holder.getOtherName(users.getState()))
+                                .putExtra("gender", holder.getOtherName(users.getGender())),
                         optionsCompat.toBundle());
             }
         });
@@ -69,7 +69,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.viewHolder>{
         return list.size();
     }
 
-    class viewHolder extends RecyclerView.ViewHolder{
+    class viewHolder extends RecyclerView.ViewHolder {
 
         CircleImageView imageView;
         TextView textView;
@@ -83,22 +83,22 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.viewHolder>{
         }
 
         private String getName(String first, String last) {
-            if(first != null && last != null){
-                return first+" "+last;
+            if (first != null && last != null) {
+                return first + " " + last;
             }
-            if(first == null && last == null){
+            if (first == null && last == null) {
                 return "";
             }
-            if(first != null){
+            if (first != null) {
                 return first;
             }
             return last;
         }
 
-        private   String getOtherName(String name){
-            if(name != null)
+        private String getOtherName(String name) {
+            if (name != null)
                 return name;
-                return "";
+            return "";
         }
     }
 }

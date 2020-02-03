@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="invisible"
+    android:id="@+id/email_sent_success_dialogue_black_layout">
+
+    <RelativeLayout
+        android:alpha="0.9"
+        android:background="@color/black"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <ImageView
+            android:layout_marginTop="78dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_dialog_bubble_white"
+            android:layout_marginStart="37dp"/>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="69dp"
+            android:layout_marginTop="11dp"
+            android:layout_marginEnd="37dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="5dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="47dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:fontFamily="@font/luckiestguy"
+                    android:text="EMAIL SENT"
+                    android:textAlignment="center"
+                    android:textColor="#0ECB5D"
+                    android:textSize="17sp" />
+
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:background="@drawable/ic_group_566"
+                    android:layout_gravity="center_horizontal"
+                    />
+                <TextView
+                    android:layout_marginBottom="47dp"
+                    android:alpha="0.8"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:fontFamily="@font/rokkitt_regular"
+                    android:text="A password recovery email has been sent to your email address, pls check your mail and come back to sign in."
+                    android:textAlignment="center"
+                    android:textColor="@color/black"
+                    android:textSize="15sp" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <Button
+            android:layout_marginStart="25dp"
+            android:id="@+id/email_sent_success_dialogue_btn_got_it"
+            android:layout_marginTop="17dp"
+            android:layout_width="170dp"
+            android:layout_height="33dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/post_btn_blue"
+            android:fontFamily="@font/rokkitt_regular"
+            android:gravity="center"
+            android:text="OK, GOT IT!"
+            android:textColor="@color/white"
+            android:textSize="15sp" />
+
+    </LinearLayout>
+</RelativeLayout>

@@ -102,4 +102,7 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="action_settings">Settings</string>
+    <string name="notification_profile_img">notification_profile_img</string>
+    <string name="accept">Accept</string>
+    <string name="decline">Decline</string>
 </resources>

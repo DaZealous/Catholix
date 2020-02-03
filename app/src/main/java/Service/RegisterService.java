@@ -50,8 +50,9 @@ public class RegisterService {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
-                                if(response.getInt("status") == 200){
-                                    getDetails(view.getUserName(), view);
+                                if(response.getBoolean("status")){
+                                    getDetails(view.getEmail(), view);
+                                    Toast.makeText(context, response.getString("message"), Toast.LENGTH_SHORT).show();
                                 }else {
                                     Toast.makeText(context, response.getString("message"), Toast.LENGTH_SHORT).show();
                                     dialog.dismiss();
@@ -94,8 +95,8 @@ public class RegisterService {
                 && manager.getActiveNetworkInfo().isConnectedOrConnecting();
     }
 
-    private void getDetails(String username, final RegisterView view) {
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, "https://www.catholix.com.ng/api.developer/GET/req.php?qdata=more&table=users&dataz=email&valuez="+username,
+    private void getDetails(String email, final RegisterView view) {
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, "https://www.catholix.com.ng/api.developer/GET/req.php?qdata=more&table=users&dataz=email&valuez="+email,
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -103,7 +104,8 @@ public class RegisterService {
                         try {
                             SharedPref.getInstance(context).addUser(object.getString("Fname")+" "+object.getString("Sname"),
                                     object.getString("Email"),
-                                    object.getString("Photo"));
+                                    object.getString("Photo"),
+                                    object.getString("ID"));
                             view.startActivity();
                             dialog.dismiss();
                         } catch (JSONException e) {

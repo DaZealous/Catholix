@@ -12,4 +12,13 @@ public interface LoginView {
     void startMainActivity();
 
     void showLoginFailed(String error);
+
+    String getForgetEmail();
+
+    void showForgetEmailError(String error);
+
+    void startEmailRecovery();
+
+    void showForgetEmailSuccess();
+
 }

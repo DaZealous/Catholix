@@ -26,7 +26,7 @@
 
         <EditText
             android:id="@+id/login_edit_username"
-            android:drawableStart="@drawable/ic_person_white_24dp"
+            android:drawableStart="@drawable/ic_email_white_24dp"
             android:drawablePadding="10dp"
             android:textColor="#ffffff"
             android:textColorHint="#ffffff"
@@ -62,6 +62,7 @@
             android:hint="Password"
             android:inputType="textPassword"/>
         </com.google.android.material.textfield.TextInputLayout>
+
         <Button
             android:textColor="#ffffff"
             android:id="@+id/login_btn_submit"
@@ -74,7 +75,7 @@
 
         <TextView
             android:layout_gravity="center_horizontal"
-            android:id="@+id/forgot_password"
+            android:id="@+id/forgot_password_text"
             android:textSize="15sp"
             android:textStyle="bold"
             android:textColor="#ffffff"
@@ -122,4 +123,5 @@
             android:text="Register"
             android:layout_marginStart="16dp"/>
     </LinearLayout>
+    <include layout="@layout/forget_password_layout"/>
 </RelativeLayout>

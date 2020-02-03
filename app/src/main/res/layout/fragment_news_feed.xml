@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -27,6 +28,7 @@
                 app:civ_border_width="1dp"/>
 
             <TextView
+                android:id="@+id/btn_what_is_on_your_mind_news_feed"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
@@ -35,6 +37,33 @@
                 android:background="@drawable/text_post_back_news"
                 android:padding="10dp"
                 android:text="@string/what_s_on_your_mind" />
+
+            <RelativeLayout
+                android:layout_marginStart="10dp"
+                android:id="@+id/fragment_news_feed_notification_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="0dp">
+
+                <ImageView
+                    android:id="@+id/fragment_news_feed_notification_icon"
+                    android:alpha="0.7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_notifications_none_black_24dp" />
+
+                <TextView
+                    android:visibility="invisible"
+                    android:id="@+id/fragment_news_feed_notification_text"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:layout_marginStart="17dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/circle_red"
+                    android:padding="10dp"
+                    android:text="" />
+            </RelativeLayout>
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView

@@ -149,6 +149,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 SharedPref.getInstance(this).removeUser();
                 startActivity(new Intent(this, WelcomeActivity.class));
                 finish();
+                return true;
             case R.id.nav_menu_users:
                 startActivity(new Intent(this, UsersActivity.class));
                 layout.closeDrawer(GravityCompat.START);
