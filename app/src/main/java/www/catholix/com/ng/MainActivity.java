@@ -27,11 +27,20 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import api.VolleyInstance;
@@ -47,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     String email, name, image;
     TextView navTitle;
     CircleImageView profileImage;
+
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +76,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getData();
         getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_navigation, new NewsFeed()).commit();
+
+        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+            @Override
+            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                if(task.isSuccessful()) {
+                    String token = task.getResult().getToken();
+
+                    Map chatAddMap = new HashMap();
+                    chatAddMap.put("device_token", token);
+                    chatAddMap.put("img_url", SharedPref.getInstance(MainActivity.this).getImage());
+                    chatAddMap.put("username", SharedPref.getInstance(MainActivity.this).getUser());
+
+                    Map chatUserMap = new HashMap();
+                    chatUserMap.put("Users/" + SharedPref.getInstance(MainActivity.this).getId(), chatAddMap);
+
+                    FirebaseDatabase.getInstance().getReference().updateChildren(chatUserMap, new DatabaseReference.CompletionListener() {
+                        @Override
+                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+                        }
+                    });
+                }
+            }
+        });
+
         layout.setDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
@@ -139,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 layout.closeDrawer(GravityCompat.START);
                 return true;
             case R.id.nav_menu_chats:
+                startActivity(new Intent(this, ChatHistory.class));
                 return false;
             case R.id.nav_menu_profile:
                 return false;

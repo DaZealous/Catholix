@@ -15,6 +15,22 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="BarTheme" parent="Theme.AppCompat.Light">
+    <!-- Customize your theme here. -->
+    <item name="colorPrimary">@color/colorPrimary</item>
+    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    <item name="colorAccent">@color/white</item>
+    <item name="android:windowContentTransitions" tools:targetApi="lollipop">true</item>
+    <item name="android:windowActivityTransitions" tools:targetApi="lollipop">true</item>
+</style>
+
+    <style name="SeekBarTheme" parent="Theme.AppCompat.Light">
+    <!-- Customize your theme here. -->
+    <item name="colorPrimary">@color/colorPrimary</item>
+    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    <item name="colorAccent">@color/white</item>
+</style>
+
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />

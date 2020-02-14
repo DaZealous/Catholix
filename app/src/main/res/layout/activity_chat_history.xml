@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white"
+    tools:context=".ChatHistory">
+
+    <include
+        android:id="@+id/activity_chat_history_app_bar"
+        layout="@layout/app_bar"/>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:layout_below="@+id/activity_chat_history_app_bar"
+        android:id="@+id/activity_chat_history_swipe_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/activity_chat_history_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/activity_chat_history_fab"
+        app:srcCompat="@android:drawable/sym_action_chat"
+        app:rippleColor="#e2e2e2"
+        android:theme="@style/ThemeOverlay.AppCompat.Light"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="20dp"/>
+
+</RelativeLayout>

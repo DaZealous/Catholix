@@ -14,12 +14,19 @@ import androidx.core.app.ActivityOptionsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import config.SharedPref;
 import de.hdodenhof.circleimageview.CircleImageView;
 import model.Users;
 import www.catholix.com.ng.FriendsProfile;
+import www.catholix.com.ng.MainActivity;
 import www.catholix.com.ng.R;
 
 public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.viewHolder> {
@@ -44,6 +51,20 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.viewHolder> 
         final Users users = list.get(position);
         holder.textView.setText(holder.getName(users.getFirstname(), users.getSurname()));
         Glide.with(context).load("https://www.catholix.com.ng/files/images/profilepics/" + users.getPhoto()).placeholder(R.drawable.ic_person_profile_24dp).into(holder.imageView);
+
+        Map chatAddMap = new HashMap();
+        chatAddMap.put("img_url", "https://www.catholix.com.ng/files/images/profilepics/" + users.getPhoto());
+
+        Map chatUserMap = new HashMap();
+        chatUserMap.put("Users/" + users.getUserId(), chatAddMap);
+
+        FirebaseDatabase.getInstance().getReference().updateChildren(chatUserMap, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+            }
+        });
+
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "503780758539",
+    "firebase_url": "https://catholix-ad19e.firebaseio.com",
+    "project_id": "catholix-ad19e",
+    "storage_bucket": "catholix-ad19e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:503780758539:android:221e42009674dfd317630e",
+        "android_client_info": {
+          "package_name": "www.catholix.com.ng"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "503780758539-k1q0gcum9igmq0h5563ferpno9kibsrl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "www.catholix.com.ng",
+            "certificate_hash": "eb0c2ed747fd8fbefb2bc0e597caa1c5c0d96a5c"
+          }
+        },
+        {
+          "client_id": "503780758539-opfv5jpikgjvstktpdfbj8chutdpitbt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHdq_zqDOOwoKAWQbjJRZ2GSl5CyKHroo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "503780758539-opfv5jpikgjvstktpdfbj8chutdpitbt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

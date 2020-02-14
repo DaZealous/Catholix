@@ -23,6 +23,7 @@ import java.util.List;
 import Service.UserService;
 import adapter.UsersAdapter;
 import api.RetrofitClient;
+import config.SharedPref;
 import model.Users;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -54,20 +55,12 @@ public class UsersActivity extends AppCompatActivity implements SwipeRefreshLayo
         adapter = new UsersAdapter(this, list);
         recyclerView.setAdapter(adapter);
 
-        btnClear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                searchEdit.setText("");
-                btnClear.setVisibility(View.INVISIBLE);
-            }
+        btnClear.setOnClickListener(view -> {
+            searchEdit.setText("");
+            btnClear.setVisibility(View.INVISIBLE);
         });
 
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
+        btnBack.setOnClickListener(view -> onBackPressed());
 
         searchEdit.addTextChangedListener(new TextWatcher() {
             @Override
@@ -103,7 +96,10 @@ public class UsersActivity extends AppCompatActivity implements SwipeRefreshLayo
             service.getUsers().enqueue(new Callback<List<Users>>(){
                 @Override
                 public void onResponse(Call<List<Users>> call, Response<List<Users>> response) {
-                    list.addAll(response.body());
+                    for(Users users : response.body()){
+                        if(!users.getUserId().equals(SharedPref.getInstance(UsersActivity.this).getId()))
+                            list.add(users);
+                    }
                     adapter.notifyDataSetChanged();
                     swipeRefreshLayout.setRefreshing(false);
                 }

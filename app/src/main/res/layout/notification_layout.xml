@@ -10,7 +10,7 @@
     <ImageView
         android:id="@+id/notification_layout_image_profile"
         android:layout_width="100dp"
-        android:layout_height="115dp"
+        android:layout_height="118dp"
         android:contentDescription="@string/notification_profile_img"
         android:src="@drawable/ic_person_profile_24dp" />
 

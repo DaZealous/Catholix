@@ -155,7 +155,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.viewHolder>{
         }
 
         private void playVideo(String photo) {
-            Toast.makeText(context, photo, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, photo, Toast.LENGTH_SHORT).show();
             videoView.setVideoURI(Uri.parse(photo));
            // MediaController controller = new MediaController(context);
             //controller.setAnchorView(videoView);

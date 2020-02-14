@@ -105,4 +105,12 @@
     <string name="notification_profile_img">notification_profile_img</string>
     <string name="accept">Accept</string>
     <string name="decline">Decline</string>
+    <string name="gallery">Gallery</string>
+    <string name="contacts">Contacts</string>
+    <string name="video">Video</string>
+    <string name="images">Images</string>
+    <string name="audio">Audio</string>
+    <string name="camera">Camera</string>
+    <string name="search">Search</string>
+    <string name="create_group">Create Group</string>
 </resources>

@@ -100,6 +100,7 @@ public class NewsFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
 
     private void getFriendReq() {
         if (NetworkConfig.getInstance(getContext()).networkAvailable()) {
+            try{
             HashMap<String, Object> map = new HashMap<>();
             map.put("req", "friend_requests");
             map.put("userID", Integer.parseInt(SharedPref.getInstance(getContext()).getId()));
@@ -137,6 +138,9 @@ public class NewsFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
 
             };
             VolleyInstance.getInstance(getContext()).addToQueue(request);
+            } catch (Exception e) {
+                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         } else {
             Toast.makeText(getContext(), "no internet connection", Toast.LENGTH_SHORT).show();
         }

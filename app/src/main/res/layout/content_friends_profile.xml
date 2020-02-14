@@ -15,6 +15,7 @@
         android:padding="20dp">
 
         <TextView
+            android:transitionName="username"
             android:id="@+id/friends_profile_text_username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -23,7 +24,8 @@
             android:text="usernamehgghgvhfsd"
             android:textColor="@color/black"
             android:textSize="17sp"
-            android:textStyle="bold|italic" />
+            android:textStyle="bold|italic"
+            tools:targetApi="lollipop" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/friends_profile_card_view_id"

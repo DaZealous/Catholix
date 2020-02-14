@@ -21,6 +21,7 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityOptionsCompat;
 
 import android.text.TextUtils;
 import android.view.View;
@@ -145,15 +146,15 @@ public class FriendsProfile extends AppCompatActivity {
         textCountry.setText("Country : " + country);
         textState.setText("State : " + state);
         textGender.setText("Gender : " + gender);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Chat coming soon!", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
+        FloatingActionButton fab =  findViewById(R.id.fab);
+
+        fab.setOnClickListener(view -> {
+             ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this,
+                        textUsername, "username");
+           startActivity(new Intent(this, ChatActivity.class).putExtra("userID", id)
+           .putExtra("username", username).putExtra("img_url", "https://www.catholix.com.ng/files/images/profilepics/" + photo), optionsCompat.toBundle());
         });
-    }
+            }
 
     private void acceptFriend() {
         if (NetworkConfig.getInstance(this).networkAvailable()) {
