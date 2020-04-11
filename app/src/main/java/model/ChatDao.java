@@ -2,15 +2,24 @@ package model;
 
 public class ChatDao {
 
-    String msg_body;
-    boolean seen;
-    String msg_type;
-    long time_stamp;
-    String from;
-    String to;
-    String msg_name;
-    String fromUsername;
-    String toUsername;
+    private String msg_body;
+    private String key;
+    private boolean seen;
+    private String msg_type;
+    private long time_stamp;
+    private String from;
+    private String to;
+    private String msg_name;
+    private String fromUsername;
+    private String toUsername;
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
 
     public String getMsg_name() {
         return msg_name;
@@ -85,8 +94,9 @@ public class ChatDao {
         this.to = to;
     }
 
-    public ChatDao(String msg_body, boolean seen, String msg_type, long time_stamp, String from, String to, String msg_name, String fromUsername, String toUsername) {
+    public ChatDao(String msg_body, String key, boolean seen, String msg_type, long time_stamp, String from, String to, String msg_name, String fromUsername, String toUsername) {
         this.msg_body = msg_body;
+        this.key = key;
         this.seen = seen;
         this.msg_type = msg_type;
         this.time_stamp = time_stamp;

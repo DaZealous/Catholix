@@ -14,11 +14,14 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import api.VolleyInstance;
+import config.SharedPref;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class PostView extends AppCompatActivity {
@@ -102,4 +105,5 @@ public class PostView extends AppCompatActivity {
             //Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+
 }

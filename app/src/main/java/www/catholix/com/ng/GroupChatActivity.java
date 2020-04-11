@@ -1,23 +1,15 @@
 package www.catholix.com.ng;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
+import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.provider.MediaStore;
-import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -29,8 +21,17 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -48,35 +49,30 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import org.apache.commons.io.FileUtils;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import adapter.ChatAdapter;
-import config.FileConfig;
-import config.GetTimeAgo;
+import adapter.GroupChatAdapter;
 import config.KeyboardUtils;
 import config.SharedPref;
 import de.hdodenhof.circleimageview.CircleImageView;
 import model.ChatDao;
 import view.ChatsView;
 
-public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, ChatsView {
+public class GroupChatActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, ChatsView {
 
     RecyclerView recyclerView;
     ImageButton btnSend, imgPickImage, imgAttach, backBtn, audioPick, btnCameraPick;
     EditText editText;
-    ChatAdapter adapter;
+    GroupChatAdapter adapter;
     List<ChatDao> list;
-    String userID, otherUser, username, otherUsername, imgUrl;
+    String userID, otherUser, username, otherUsername, imgUrl, youAndOthers, admin;
     SwipeRefreshLayout swipeRefreshLayout;
     ImageView imageView;
     static int DC_RESULT = 1, AUDIO_RESULT = 2;
@@ -100,273 +96,255 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
     String outputFile, online;
     private File rootFile;
     String dir, fileName;
+    RelativeLayout relativeLayout;
+    TextView textUserAdded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_group_chat);
 
-        try {
-            setContentView(R.layout.activity_chat);
+        username = SharedPref.getInstance(this).getUser();
+        userID = SharedPref.getInstance(this).getId();
+        otherUser = getIntent().getStringExtra("userID");
+        otherUsername = getIntent().getStringExtra("username");
+        imgUrl = getIntent().getStringExtra("img_url");
+        recyclerView = findViewById(R.id.activity_chat_recycler_view);
+        btnSend = findViewById(R.id.activity_chat_btn_send);
+        imgPickImage = findViewById(R.id.activity_chat_image_file_pick);
+        audioPick = findViewById(R.id.activity_chat_audio_file_pick);
+        imgAttach = findViewById(R.id.activity_chat_img_attach);
+        editText = findViewById(R.id.activity_chat_edit_text);
+        swipeRefreshLayout = findViewById(R.id.activity_chat_swipe_refresh);
+        textUsername = findViewById(R.id.activity_chat_text_username);
+        textTimeStamp = findViewById(R.id.activity_chat_text_time);
+        chooseFileLayout = findViewById(R.id.activity_chat_card_choose_file_layout);
+        userImage = findViewById(R.id.activity_chat_user_img);
+        bar = findViewById(R.id.activity_chat_progress_file_upload);
+        backBtn = findViewById(R.id.activity_chat_back_btn);
+        relativeLayout = findViewById(R.id.activity_group_chat_relative_layout);
+        textUserAdded = findViewById(R.id.activity_group_chat_text_user_added);
+        btnCameraPick = findViewById(R.id.activity_chat_image_camera_pick);
+        Glide.with(this).load(imgUrl).placeholder(otherUser.matches("\\d+")?R.drawable.ic_person_profile_24dp:R.drawable.ic_people_outline_grey_24dp).into(userImage);
+        textUsername.setText(otherUsername);
+        textTimeStamp.setText("");
+        imageView = new ImageView(this);
+        mLinearLayout = new LinearLayoutManager(this);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        list = new ArrayList<>();
+        adapter = new GroupChatAdapter(this, list, this);
+        recyclerView.setLayoutManager(mLinearLayout);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(adapter);
+        rootRef = FirebaseDatabase.getInstance().getReference();
+        mImageStorage = FirebaseStorage.getInstance().getReference();
+        slideLeft = AnimationUtils.loadAnimation(this, R.anim.card_slide_left2);
+        slideRight = AnimationUtils.loadAnimation(this, R.anim.slide_right2);
+        outputFile = Environment.getExternalStorageDirectory().getAbsolutePath();
+        online = "";
+        admin = "";
 
-            username = SharedPref.getInstance(this).getUser();
-            userID = SharedPref.getInstance(this).getId();
-            otherUser = getIntent().getStringExtra("userID");
-            otherUsername = getIntent().getStringExtra("username");
-            imgUrl = getIntent().getStringExtra("img_url");
-            recyclerView = findViewById(R.id.activity_chat_recycler_view);
-            btnSend = findViewById(R.id.activity_chat_btn_send);
-            imgPickImage = findViewById(R.id.activity_chat_image_file_pick);
-            audioPick = findViewById(R.id.activity_chat_audio_file_pick);
-            imgAttach = findViewById(R.id.activity_chat_img_attach);
-            editText = findViewById(R.id.activity_chat_edit_text);
-            swipeRefreshLayout = findViewById(R.id.activity_chat_swipe_refresh);
-            textUsername = findViewById(R.id.activity_chat_text_username);
-            textTimeStamp = findViewById(R.id.activity_chat_text_time);
-            chooseFileLayout = findViewById(R.id.activity_chat_card_choose_file_layout);
-            userImage = findViewById(R.id.activity_chat_user_img);
-            bar = findViewById(R.id.activity_chat_progress_file_upload);
-            backBtn = findViewById(R.id.activity_chat_back_btn);
-            btnCameraPick = findViewById(R.id.activity_chat_image_camera_pick);
-            Glide.with(this).load(imgUrl).placeholder(R.drawable.ic_person_profile_24dp).into(userImage);
-            textUsername.setText(otherUsername);
-            textTimeStamp.setText("");
-            imageView = new ImageView(this);
-            mLinearLayout = new LinearLayoutManager(this);
-            swipeRefreshLayout.setOnRefreshListener(this);
-            list = new ArrayList<>();
-            adapter = new ChatAdapter(this, list, this);
-            recyclerView.setLayoutManager(mLinearLayout);
-            recyclerView.setHasFixedSize(true);
-            recyclerView.setAdapter(adapter);
-            rootRef = FirebaseDatabase.getInstance().getReference();
-            mImageStorage = FirebaseStorage.getInstance().getReference();
-            slideLeft = AnimationUtils.loadAnimation(this, R.anim.card_slide_left2);
-            slideRight = AnimationUtils.loadAnimation(this, R.anim.slide_right2);
-            outputFile = Environment.getExternalStorageDirectory().getAbsolutePath();
-            online = "";
+        relativeLayout.setOnClickListener(view -> {
+            ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this,
+                    userImage, "groupChatImg");
+            startActivity(new Intent(this, GroupChatSettings.class)
+                            .putExtra("username", otherUsername)
+                            .putExtra("img_url", imgUrl)
+                            .putExtra("chat_id", otherUser),
+                    optionsCompat.toBundle());
+        });
 
-            rootRef.child("Chat").child(userID).child(otherUser).child("seen").setValue(true);
 
-            rootRef.child("Users").child(otherUser).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
+        rootRef.child("Users").child(otherUser).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                try {
+                    admin = dataSnapshot.child("admin").getValue(String.class);
+                    imgUrl = dataSnapshot.child("img_url").getValue(String.class);
+                    Glide.with(GroupChatActivity.this).load(imgUrl).placeholder(otherUser.matches("\\d+")?R.drawable.ic_person_profile_24dp:R.drawable.ic_people_outline_grey_24dp).into(userImage);
+                    youAndOthers = "You and " + dataSnapshot.child("members").getChildrenCount() + " others";
+                    textTimeStamp.setText(youAndOthers);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
 
-                    if (dataSnapshot.child("online").getValue() != null) {
-                        online = dataSnapshot.child("online").getValue().toString();
-                        if (!TextUtils.isEmpty(online)) {
-                            if (online.equals("true")) {
-                                textTimeStamp.setText("Online");
-                            } else {
-                                long lastTime = Long.parseLong(online);
-                                String lastSeenTime = "active " + GetTimeAgo.getTimeAgo(lastTime, getApplicationContext());
-                                textTimeStamp.setText(lastSeenTime);
-                            }
-                        } else {
-                            textTimeStamp.setText("");
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        rootRef.child("messages").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.hasChild(otherUser)){
+                    rootRef.child("Users").child(admin).addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            swipeRefreshLayout.setRefreshing(false);
+                            textUserAdded.setVisibility(View.VISIBLE);
+                            textUserAdded.setText(admin.equals(SharedPref.getInstance(GroupChatActivity.this).getId())?"You created this group":dataSnapshot.child("username").getValue(String.class)+" added you to this group");
                         }
-                    }
-                }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-
-
-            slideRight.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    imgAttach.setVisibility(View.GONE);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-
-            slideLeft.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    imgAttach.setVisibility(View.VISIBLE);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-            loadMessages();
-
-            rootRef.child("Chat").child(userID).child(otherUser).child("typing").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    String typing = dataSnapshot.getValue(String.class);
-
-                    if (!TextUtils.isEmpty(typing))
-                        if (typing.equals("true")) {
-
-                            textTimeStamp.setText("typing...");
-
-                        } else {
-                            if (!TextUtils.isEmpty(online))
-                                textTimeStamp.setText((online.equals("true") ? "Online" : "active " + GetTimeAgo.getTimeAgo(Long.parseLong(online), getApplicationContext())));
-                            else
-                                textTimeStamp.setText("");
                         }
-
+                    });
+                }else{
+                    textUserAdded.setVisibility(View.INVISIBLE);
+                    swipeRefreshLayout.setRefreshing(false);
                 }
+            }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                }
-            });
+            }
+        });
+
+        slideRight.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                imgAttach.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+        slideLeft.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                imgAttach.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
 
 
-            rootRef.child("Chat").child(userID).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    if (!dataSnapshot.hasChild(otherUser)) {
-
-                        Map chatAddMap = new HashMap();
-                        chatAddMap.put("seen", false);
-                        chatAddMap.put("time_stamp", ServerValue.TIMESTAMP);
-
-                        Map chatUserMap = new HashMap();
-                        chatUserMap.put("Chat/" + userID + "/" + otherUser, chatAddMap);
-                        chatUserMap.put("Chat/" + otherUser + "/" + userID, chatAddMap);
-
-                        rootRef.updateChildren(chatUserMap, (databaseError, databaseReference) -> {
-
-                        });
-
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-
-        } catch (Exception e) {
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-
-        try {
-
-            KeyboardUtils.addKeyboardToggleListener(this, isVisible -> {
-                if (isVisible) {
-                    imgAttach.startAnimation(slideRight);
-                    rootRef.child("Chat").child(otherUser).child(userID).child("typing").setValue("true");
-                } else {
-                    imgAttach.startAnimation(slideLeft);
-                    rootRef.child("Chat").child(otherUser).child(userID).child("typing").setValue("false");
-                }
-            });
-
-            btnSend.setOnClickListener(view -> {
-                if (isChat) {
-                    if (!TextUtils.isEmpty(editText.getText().toString())) {
-                        sendMessage(editText.getText().toString());
+        rootRef.child("Chat").child(otherUser).child("typing").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    if (!username.split(" ")[0].equalsIgnoreCase(dataSnapshot.getValue().toString())) {
+                        online = dataSnapshot.getValue().toString() + " is typing...";
+                        textTimeStamp.setText(online);
                     }
                 } else {
-                    if (isRecording) {
-                        try {
-                            isRecording = false;
-                            mediaRecorder.stop();
-                            mediaRecorder.release();
-                            mediaRecorder = null;
-                            btnSend.setImageResource(R.drawable.ic_keyboard_voice_white_24dp);
-                            sendAudio(Uri.fromFile(new File(dir)));
-                        } catch (Exception e) {
-                            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        startRecording();
-                    }
+                    textTimeStamp.setText(youAndOthers);
                 }
-            });
+            }
 
-            editText.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
+            }
+        });
+        loadMessages();
+
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (TextUtils.isEmpty(editText.getText().toString())) {
+                    isChat = false;
+                    btnSend.setImageResource(R.drawable.ic_keyboard_voice_white_24dp);
+                } else {
+                    isChat = true;
+                    btnSend.setImageResource(R.drawable.ic_send_white_24dp);
                 }
+            }
 
-                @Override
-                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                    if (TextUtils.isEmpty(editText.getText().toString())) {
-                        isChat = false;
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
+        KeyboardUtils.addKeyboardToggleListener(this, isVisible -> {
+            if (isVisible) {
+                imgAttach.startAnimation(slideRight);
+                rootRef.child("Chat").child(otherUser).child("typing").setValue(username.split(" ")[0].toLowerCase());
+            } else {
+                imgAttach.startAnimation(slideLeft);
+                rootRef.child("Chat").child(otherUser).child("typing").setValue(null);
+            }
+        });
+
+        btnSend.setOnClickListener(view -> {
+            if (isChat) {
+                if (!TextUtils.isEmpty(editText.getText().toString())) {
+                    sendMessage(editText.getText().toString());
+                }
+            } else {
+                if (isRecording) {
+                    try {
+                        isRecording = false;
+                        mediaRecorder.stop();
+                        mediaRecorder.release();
+                        mediaRecorder = null;
                         btnSend.setImageResource(R.drawable.ic_keyboard_voice_white_24dp);
-                    } else {
-                        isChat = true;
-                        btnSend.setImageResource(R.drawable.ic_send_white_24dp);
+                        sendAudio(Uri.fromFile(new File(dir)));
+                    } catch (Exception e) {
+                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
-                }
-
-                @Override
-                public void afterTextChanged(Editable editable) {
-
-                }
-            });
-            imgAttach.setOnClickListener(view -> {
-                if (isChooseFileVisible) {
-                    chooseFileLayout.setVisibility(View.GONE);
-                    isChooseFileVisible = false;
                 } else {
-                    chooseFileLayout.setVisibility(View.VISIBLE);
-                    isChooseFileVisible = true;
+                    startRecording();
                 }
-            });
+            }
+        });
 
-            backBtn.setOnClickListener(view -> onBackPressed());
-
-            imgPickImage.setOnClickListener(view -> {
+        imgAttach.setOnClickListener(view -> {
+            if (isChooseFileVisible) {
                 chooseFileLayout.setVisibility(View.GONE);
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/*");
-                startActivityForResult(Intent.createChooser(intent, "SELECT IMAGE"), DC_RESULT);
-            });
+                isChooseFileVisible = false;
+            } else {
+                chooseFileLayout.setVisibility(View.VISIBLE);
+                isChooseFileVisible = true;
+            }
+        });
 
-            audioPick.setOnClickListener(view -> {
-                chooseFileLayout.setVisibility(View.GONE);
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("audio/*");
-                startActivityForResult(Intent.createChooser(intent, "SELECT AUDIO"), AUDIO_RESULT);
-            });
+        backBtn.setOnClickListener(view -> onBackPressed());
 
-            btnCameraPick.setOnClickListener(view -> {
-                chooseFileLayout.setVisibility(View.GONE);
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(intent, DC_RESULT);
-            });
+        imgPickImage.setOnClickListener(view -> {
+            chooseFileLayout.setVisibility(View.GONE);
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            startActivityForResult(Intent.createChooser(intent, "SELECT IMAGE"), DC_RESULT);
+        });
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        btnCameraPick.setOnClickListener(view -> {
+            chooseFileLayout.setVisibility(View.GONE);
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(intent, DC_RESULT);
+        });
     }
 
     private void sendAudio(Uri uri) {
         bar.setVisibility(View.VISIBLE);
         Toast.makeText(this, "sending audio...", Toast.LENGTH_SHORT).show();
-        final String current_user_ref = "messages/" + userID + "/" + otherUser;
-        final String chat_user_ref = "messages/" + otherUser + "/" + userID;
+        String current_user_ref = "messages/" + userID + "/" + otherUser;
+        String chat_user_ref = "messages/" + otherUser;
 
         DatabaseReference user_message_push = rootRef.child("messages")
                 .child(userID).child(otherUser).push();
@@ -409,14 +387,14 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
 
                         if (databaseError == null) {
                             bar.setVisibility(View.INVISIBLE);
-                            Toast.makeText(ChatActivity.this, "uploaded successfully", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(GroupChatActivity.this, "uploaded successfully", Toast.LENGTH_SHORT).show();
                         }
 
                     });
                 });
             } else {
                 bar.setVisibility(View.INVISIBLE);
-                Toast.makeText(ChatActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(GroupChatActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
             }
         });
 
@@ -451,7 +429,7 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
         if (!TextUtils.isEmpty(message)) {
 
             String current_user_ref = "messages/" + userID + "/" + otherUser;
-            String chat_user_ref = "messages/" + otherUser + "/" + userID;
+            String chat_user_ref = "messages/" + otherUser;
 
             DatabaseReference user_message_push = rootRef.child("messages")
                     .child(userID).child(otherUser).push();
@@ -501,13 +479,12 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     private void loadMessages() {
         swipeRefreshLayout.setRefreshing(true);
-        DatabaseReference chatRef = rootRef.child("messages").child(userID).child(otherUser);
+        DatabaseReference chatRef = rootRef.child("messages").child(otherUser);
         Query messageQuery = chatRef.limitToLast(mCurrentPage * TOTAL_ITEMS_TO_LOAD);
         list.clear();
         messageQuery.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                if (dataSnapshot.hasChildren()) {
                     ChatDao message = dataSnapshot.getValue(ChatDao.class);
 
                     if (pos == 0 && message.getSeen())
@@ -530,8 +507,7 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
                     adapter.notifyDataSetChanged();
                     recyclerView.scrollToPosition(adapter.getItemCount() - 1);
                     swipeRefreshLayout.setRefreshing(false);
-                } else
-                    swipeRefreshLayout.setRefreshing(false);
+                    textUserAdded.setVisibility(View.INVISIBLE);
             }
 
             @Override
@@ -568,33 +544,24 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
                 imgContain.setImageURI(imageUri);
                 Bitmap bitmap = ((BitmapDrawable) imgContain.getDrawable()).getBitmap();
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 60, stream);
                 final byte[] thumb_byte = stream.toByteArray();
                 doUpload(thumb_byte);
             } catch (Exception e) {
                 Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == AUDIO_RESULT && resultCode == RESULT_OK) {
+            try {
                 Uri audioUri = data.getData();
                 if (audioUri != null) {
                     dir = audioUri.getPath();
-                    Cursor cursor = getContentResolver().query(audioUri, null, null, null, null);
-                    int index = cursor.getColumnIndex(OpenableColumns.SIZE);
-                    cursor.moveToFirst();
-                    //String myFile = cursor.getString(index);
-                    long bytes = cursor.getLong(index);
-                    cursor.close();
-                    File file = new File(dir);
-                    fileName = file.getName();
-                    long kilo = bytes / 1024;
-                    long mega = kilo / 1024;
-                    if (mega > 2)
-                        Toast.makeText(this, "you cannot send audio file greater than 2mb", Toast.LENGTH_SHORT).show();
-                    else {
-                        sendAudio(audioUri);
-                       // Toast.makeText(this, fileName, Toast.LENGTH_LONG).show();
-                    }
+                    fileName = new File(dir).getName();
+                    FileUtils.copy(new FileInputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Catholix/")), new FileOutputStream(new File(dir)));
+                    sendAudio(audioUri);
                 }
+            } catch (Exception e) {
+                Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         }
 
     }
@@ -602,13 +569,15 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
     private void doUpload(byte[] thumb_byte) {
         bar.setVisibility(View.VISIBLE);
         Toast.makeText(this, "uploading....", Toast.LENGTH_LONG).show();
-        final String current_user_ref = "messages/" + userID + "/" + otherUser;
-        final String chat_user_ref = "messages/" + otherUser + "/" + userID;
+
+        String current_user_ref = "messages/" + userID + "/" + otherUser;
+        String chat_user_ref = "messages/" + otherUser;
 
         DatabaseReference user_message_push = rootRef.child("messages")
                 .child(userID).child(otherUser).push();
 
         final String push_id = user_message_push.getKey();
+
         final StorageReference thumbRef = mImageStorage.child("message_images").child(push_id + ".jpg");
         final UploadTask uploadTask = thumbRef.putBytes(thumb_byte);
 
@@ -632,7 +601,6 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
                             messageMap.put("fromUsername", username);
                             messageMap.put("toUsername", otherUsername);
 
-
                             Map messageUserMap = new HashMap();
                             messageUserMap.put(current_user_ref + "/" + push_id, messageMap);
                             messageUserMap.put(chat_user_ref + "/" + push_id, messageMap);
@@ -650,7 +618,7 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
 
                                 if (databaseError == null) {
                                     bar.setVisibility(View.INVISIBLE);
-                                    Toast.makeText(ChatActivity.this, "uploaded successfully", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(GroupChatActivity.this, "uploaded successfully", Toast.LENGTH_SHORT).show();
 
                                 }
 
@@ -659,7 +627,7 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
                     });
                 } else {
                     bar.setVisibility(View.INVISIBLE);
-                    Toast.makeText(ChatActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(GroupChatActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -667,7 +635,6 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     @Override
     public void onRefresh() {
-
         mCurrentPage++;
         itemPos = 0;
         loadMoreMessages();
@@ -762,5 +729,4 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
         super.onPause();
         rootRef.child("Chat").child(otherUser).child(userID).child("typing").setValue("false");
     }
-
 }

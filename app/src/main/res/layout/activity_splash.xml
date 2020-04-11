@@ -9,13 +9,14 @@
     tools:context=".SplashActivity">
 
     <ImageView
+        android:elevation="10dp"
         android:transitionName="icon"
         android:id="@+id/splash_image_icon"
         android:contentDescription="@string/app_name"
         android:scaleType="fitXY"
-        android:layout_width="180dp"
-        android:layout_height="130dp"
-        android:src="@mipmap/app_logo"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:src="@mipmap/catholix_logo"
         android:layout_centerInParent="true"
         tools:targetApi="lollipop" />
 

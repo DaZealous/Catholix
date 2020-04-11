@@ -52,18 +52,8 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.viewHolder> 
         holder.textView.setText(holder.getName(users.getFirstname(), users.getSurname()));
         Glide.with(context).load("https://www.catholix.com.ng/files/images/profilepics/" + users.getPhoto()).placeholder(R.drawable.ic_person_profile_24dp).into(holder.imageView);
 
-        Map chatAddMap = new HashMap();
-        chatAddMap.put("img_url", "https://www.catholix.com.ng/files/images/profilepics/" + users.getPhoto());
-
-        Map chatUserMap = new HashMap();
-        chatUserMap.put("Users/" + users.getUserId(), chatAddMap);
-
-        FirebaseDatabase.getInstance().getReference().updateChildren(chatUserMap, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-
-            }
-        });
+        FirebaseDatabase.getInstance().getReference().child("Users").child(users.getUserId()).child("img_url").setValue("https://www.catholix.com.ng/files/images/profilepics/" + users.getPhoto());
+        FirebaseDatabase.getInstance().getReference().child("Users").child(users.getUserId()).child("username").setValue(holder.getName(users.getFirstname(), users.getSurname()));
 
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -47,7 +47,7 @@ import view.ChatsView;
 import www.catholix.com.ng.FileViewer;
 import www.catholix.com.ng.R;
 
-public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
+public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.viewHolder> {
 
     private Context context;
     private List<ChatDao> list;
@@ -56,7 +56,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
     private boolean isPlaying;
     private Handler handler;
 
-    public ChatAdapter(Context context, List<ChatDao> list, ChatsView chatsView) {
+    public GroupChatAdapter(Context context, List<ChatDao> list, ChatsView chatsView) {
         this.context = context;
         this.list = list;
         this.chatsView = chatsView;
@@ -65,14 +65,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
     @NonNull
     @Override
     public viewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(context).inflate(R.layout.chats_layout, parent, false);
-        return new ChatAdapter.viewHolder(v);
+        View v = LayoutInflater.from(context).inflate(R.layout.group_chat_layout, parent, false);
+        return new GroupChatAdapter.viewHolder(v);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onBindViewHolder(@NonNull viewHolder holder, int position) {
-        try {
             ChatDao dao = list.get(position);
             holder.checkUser(dao.getFrom());
             holder.checkType(dao.getMsg_type(), dao.getMsg_body(), dao.getMsg_name());
@@ -80,6 +79,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
             holder.setTextUser(dao.getMsg_body());
             holder.setTextUserTime(Long.toString(dao.getTime_stamp()));
             holder.setTextAdminTime(Long.toString(dao.getTime_stamp()));
+            holder.textOtherUser.setText(dao.getFromUsername());
+            holder.imgOtherUser.setText(dao.getFromUsername());
+            holder.audioOtherUser.setText(dao.getFromUsername());
             holder.imgChatUserTime.setText(DateUtils.getRelativeTimeSpanString(dao.getTime_stamp()));
             holder.imgChatAdminTime.setText(DateUtils.getRelativeTimeSpanString(dao.getTime_stamp()));
             holder.userAudioTime.setText(DateUtils.getRelativeTimeSpanString(dao.getTime_stamp()));
@@ -279,9 +281,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
                 builder.create().show();
                 return true;
             });
-        } catch (Exception e) {
-            Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
 
     }
 
@@ -295,7 +294,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
         LinearLayout adminLinear;
         RelativeLayout userLinear, imgLayout1, imgLayout2;
         CardView imgUser, imgAdmin, textAdminCard, textUserCard, cardAdminAudio, cardUserAudio;
-        TextView textUser, textAdmin, adminTime, userTime, imgChatUserTime, imgChatAdminTime, adminAudioTime, userAudioTime;
+        TextView textUser, textAdmin, adminTime, userTime, imgChatUserTime, imgChatAdminTime, adminAudioTime, userAudioTime,
+        imgOtherUser, textOtherUser, audioOtherUser;
         ImageView chatAdminImg, chatUserImg;
         ImageButton adminAudioPlayBtn, userAudioPlayBtn;
         SeekBar adminAudioSeekBar, userAudioSeekBar;
@@ -326,6 +326,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
             adminAudioPlayBtn = itemView.findViewById(R.id.chat_admin_audio_play_btn);
             adminAudioSeekBar = itemView.findViewById(R.id.chat_admin_audio_seek_bar);
             userAudioSeekBar = itemView.findViewById(R.id.chat_user_audio_seek_bar);
+            imgOtherUser = itemView.findViewById(R.id.chat_admin_img_text_user);
+            textOtherUser = itemView.findViewById(R.id.chat_admin_text_text_user);
+            audioOtherUser = itemView.findViewById(R.id.chat_admin_audio_text_user);
         }
 
         private void setTextUser(String text) {
@@ -379,7 +382,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
                 imgUser.setVisibility(View.GONE);
                 cardUserAudio.setVisibility(View.VISIBLE);
                 cardAdminAudio.setVisibility(View.VISIBLE);
-                //context.getFileStreamPath(msg_name);
                 File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Catholix/" + msg_name);
                 if (file.exists()) {
                     userAudioPlayBtn.setImageResource(R.drawable.ic_play_arrow_white_24dp);

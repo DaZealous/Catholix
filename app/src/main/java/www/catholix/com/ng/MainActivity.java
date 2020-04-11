@@ -33,6 +33,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
@@ -77,27 +78,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getData();
         getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_navigation, new NewsFeed()).commit();
 
-        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-            @Override
-            public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                if(task.isSuccessful()) {
-                    String token = task.getResult().getToken();
+        //FirebaseDatabase.getInstance().getReference().child("Users").child(SharedPref.getInstance(this).getId()).child("online").setValue("true");
+        FirebaseDatabase.getInstance().getReference().child("Users").child(SharedPref.getInstance(this).getId()).child("online").onDisconnect().setValue(System.currentTimeMillis());
 
-                    Map chatAddMap = new HashMap();
-                    chatAddMap.put("device_token", token);
-                    chatAddMap.put("img_url", SharedPref.getInstance(MainActivity.this).getImage());
-                    chatAddMap.put("username", SharedPref.getInstance(MainActivity.this).getUser());
+        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(task -> {
+            if(task.isSuccessful()) {
+                String token = task.getResult().getToken();
 
-                    Map chatUserMap = new HashMap();
-                    chatUserMap.put("Users/" + SharedPref.getInstance(MainActivity.this).getId(), chatAddMap);
+                Map chatAddMap = new HashMap();
+                chatAddMap.put("device_token", token);
+                chatAddMap.put("img_url", "https://www.catholix.com.ng/files/images/profilepics/"+SharedPref.getInstance(MainActivity.this).getImage());
+                chatAddMap.put("username", SharedPref.getInstance(MainActivity.this).getUser());
+                chatAddMap.put("online", "true");
 
-                    FirebaseDatabase.getInstance().getReference().updateChildren(chatUserMap, new DatabaseReference.CompletionListener() {
-                        @Override
-                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                Map chatUserMap = new HashMap();
+                chatUserMap.put("Users/" + SharedPref.getInstance(MainActivity.this).getId(), chatAddMap);
 
-                        }
-                    });
-                }
+                FirebaseDatabase.getInstance().getReference().updateChildren(chatUserMap, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+
+                    }
+                });
             }
         });
 
@@ -182,6 +184,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 return false;
             case R.id.nav_menu_logout:
                 layout.closeDrawer(GravityCompat.START);
+                FirebaseDatabase.getInstance().getReference().child("Users").child(SharedPref.getInstance(this).getId()).child("online").setValue(System.currentTimeMillis());
+                FirebaseDatabase.getInstance().getReference().child("Users").child(SharedPref.getInstance(this).getId()).child("device_token").setValue("");
                 SharedPref.getInstance(this).removeUser();
                 startActivity(new Intent(this, WelcomeActivity.class));
                 finish();
@@ -216,4 +220,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         else
             super.onBackPressed();
     }
+
 }

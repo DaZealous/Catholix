@@ -21,6 +21,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -40,7 +41,6 @@ public class ChatHistory extends AppCompatActivity implements SwipeRefreshLayout
     ChatHistoryAdapter adapter;
     SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView mConvList;
-
     private DatabaseReference mConvDatabase;
     private DatabaseReference mMessageDatabase;
     private DatabaseReference mUsersDatabase;
@@ -87,6 +87,13 @@ public class ChatHistory extends AppCompatActivity implements SwipeRefreshLayout
         floatingActionButton.setOnClickListener(view ->
             startActivity(new Intent(this, UsersActivity.class))
         );
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        list.clear();
+        convs.clear();
         loadHistory();
     }
 
@@ -94,41 +101,9 @@ public class ChatHistory extends AppCompatActivity implements SwipeRefreshLayout
         swipeRefreshLayout.setRefreshing(true);
         list.clear();
         convs.clear();
+
         Query conversationQuery = mConvDatabase.orderByChild("time_stamp");
 
-        /*conversationQuery.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                if(dataSnapshot.hasChildren()){
-                    if(dataSnapshot.child("time_stamp").getValue(Long.class) != null) {
-                        list.add(dataSnapshot.getKey());
-                        convs.add(dataSnapshot.getValue(Conv.class));
-                        swipeRefreshLayout.setRefreshing(false);
-                        adapter.notifyDataSetChanged();
-                    }
-                }
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });*/
         conversationQuery.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -162,12 +137,24 @@ public class ChatHistory extends AppCompatActivity implements SwipeRefreshLayout
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        return super.onOptionsItemSelected(item);
+        int id = item.getItemId();
+        switch (id){
+            case R.id.chat_history_create_group_id:
+                createGroup();
+                return true;
+                default:
+                    return false;
+        }
+    }
+
+    private void createGroup() {
+        startActivity(new Intent(this, CreateGroup.class));
     }
 
     @Override
     public void onRefresh() {
        loadHistory();
     }
+
 
 }

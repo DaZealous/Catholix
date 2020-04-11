@@ -10,7 +10,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 
+import config.SharedPref;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class FileViewer extends AppCompatActivity {
@@ -43,11 +46,12 @@ public class FileViewer extends AppCompatActivity {
 
         Glide.with(this).load("https://www.catholix.com.ng/files/images/profilepics/" + imgUrl).placeholder(R.drawable.ic_person_profile_24dp).into(userImg);
 
-        Glide.with(this).load(thumb_byte).placeholder(R.drawable.ic_person_profile_24dp).into(imageView);
+        //Glide.with(this).load(thumb_byte).placeholder(R.drawable.ic_person_profile_24dp).into(imageView);
 
-        //imageView.setImageBitmap(BitmapFactory.decodeByteArray(thumb_byte, 0, thumb_byte.length));
+        imageView.setImageBitmap(BitmapFactory.decodeByteArray(thumb_byte, 0, thumb_byte.length));
 
         backBtn.setOnClickListener(view -> onBackPressed());
 
     }
+
 }

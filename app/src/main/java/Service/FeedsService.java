@@ -8,6 +8,7 @@ import io.reactivex.Single;
 import model.Feeds;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
@@ -24,6 +25,7 @@ public interface FeedsService {
 
     @GET("req.php?qdata=all&table=feed")
     Single<List<Feeds>> getNewsFeeds();
+
 
     @DELETE("chats/{username}")
     Completable deleteMessage(@Path("username") String username, @Field("id") String id);

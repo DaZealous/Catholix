@@ -17,6 +17,8 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -190,4 +192,5 @@ public class NotificationActivity extends AppCompatActivity implements SwipeRefr
             Toast.makeText(this, "no internet connection", Toast.LENGTH_SHORT).show();
         }
     }
+
 }

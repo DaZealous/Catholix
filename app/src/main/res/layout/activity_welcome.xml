@@ -20,15 +20,15 @@
         android:src="@mipmap/app_logo"
         tools:targetApi="lollipop" />
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="vertical"
         android:layout_weight="1">
     <androidx.viewpager.widget.ViewPager
        android:layout_gravity="center_horizontal"
         android:id="@+id/welcome_viewpager"
-        android:layout_width="wrap_content"
-        android:layout_height="100dp" />
+        android:layout_width="match_parent"
+        android:layout_height="150dp" />
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -59,11 +59,12 @@
     android:orientation="horizontal">
     <ImageView
         android:background="@drawable/sponsor_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_width="30dp"
+        android:layout_height="30dp" />
 
     <TextView
-        android:textSize="16sp"
+        android:fontFamily="@font/rokkitt_regular"
+        android:textSize="15sp"
         android:textStyle="bold"
         android:textColor="#ffffff"
         android:layout_width="wrap_content"
@@ -75,16 +76,17 @@
         android:background="#ffffff"
         android:layout_width="2dp"
         android:layout_height="20dp"
-        android:layout_marginStart="16dp"/>
+        android:layout_marginStart="10dp"/>
 
     <TextView
+        android:fontFamily="@font/rokkitt_regular"
         android:id="@+id/welcome_register"
-        android:textSize="16sp"
+        android:textSize="15sp"
         android:textStyle="bold"
         android:textColor="#ffffff"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Register"
-        android:layout_marginStart="16dp"/>
+        android:layout_marginStart="10dp"/>
 </LinearLayout>
 </LinearLayout>

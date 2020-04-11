@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    tools:context=".CreateGroup">
+
+    <include layout="@layout/app_bar"/>
+    <LinearLayout
+        android:layout_margin="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/activity_create_group_img_view"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_people_outline_grey_24dp"
+            app:civ_border_color="@color/colorPrimaryDark"
+            app:civ_border_width="2dp" />
+
+        <EditText
+            android:id="@+id/activity_create_group_edit_text"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="enter group subject"
+            android:layout_marginTop="10dp"
+            android:maxLines="1"
+            android:inputType="text"
+            android:backgroundTint="@color/colorPrimary"
+            android:fontFamily="@font/rokkitt_regular"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            android:layout_marginStart="10dp"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/activity_create_group_btn_create"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_check_white_24dp" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="17sp"
+        android:text="Participant : 0"
+        android:layout_marginStart="15dp"
+        android:fontFamily="@font/rokkitt_regular"
+        android:layout_marginBottom="10dp"
+        android:id="@+id/create_group_participant"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/create_group_recycler_view"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"/>
+        <ProgressBar
+            android:id="@+id/create_group_progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
+</LinearLayout>

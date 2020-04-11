@@ -12,6 +12,9 @@
     android:background="@color/white"
     android:id="@+id/user_chat_history_linear_layout">
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/user_chat_history_image_profile"
         android:layout_width="45dp"
@@ -20,7 +23,20 @@
         android:src="@drawable/ic_person_profile_24dp"
         app:civ_border_color="@color/colorPrimaryDark"
         app:civ_border_width="1dp" />
-
+        <TextView
+            android:visibility="gone"
+            android:background="@drawable/round_circle_green"
+            android:layout_marginTop="30dp"
+            android:id="@+id/user_chat_history_text_online"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="35dp"
+            android:text=""
+            android:textColor="#000000"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+</RelativeLayout>
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -70,6 +86,19 @@
                 android:fontFamily="@font/rokkitt_regular"
                 android:text=""
                 android:textColor="#000000"
+                android:textSize="15sp" />
+
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/user_chat_history_text_typing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:fontFamily="@font/rokkitt_regular"
+                android:text=""
+                android:textColor="#22D80F"
                 android:textSize="15sp" />
 
             <TextView

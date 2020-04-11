@@ -37,7 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Email"
-            android:inputType="textPersonName"/>
+            android:inputType="textEmailAddress"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_marginTop="16dp"
@@ -95,33 +95,35 @@
 
         <ImageView
             android:background="@drawable/sponsor_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_width="30dp"
+            android:layout_height="30dp" />
 
         <TextView
-            android:textSize="16sp"
+            android:fontFamily="@font/rokkitt_regular"
+            android:textSize="15sp"
             android:textStyle="bold"
             android:textColor="#ffffff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="All Rights Reserved"
-            android:layout_marginStart="16dp"/>
+            android:layout_marginStart="10dp"/>
 
         <View
             android:background="#ffffff"
             android:layout_width="2dp"
             android:layout_height="20dp"
-            android:layout_marginStart="16dp"/>
+            android:layout_marginStart="10dp"/>
 
         <TextView
+            android:fontFamily="@font/rokkitt_regular"
             android:id="@+id/login_text_register"
-            android:textSize="16sp"
+            android:textSize="15sp"
             android:textStyle="bold"
             android:textColor="#ffffff"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Register"
-            android:layout_marginStart="16dp"/>
+            android:layout_marginStart="10dp"/>
     </LinearLayout>
     <include layout="@layout/forget_password_layout"/>
 </RelativeLayout>

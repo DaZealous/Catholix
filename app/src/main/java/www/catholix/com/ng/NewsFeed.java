@@ -93,8 +93,8 @@ public class NewsFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
             }
         });
 
-        getFriendReq();
         loadData();
+        getFriendReq();
         return view;
     }
 
