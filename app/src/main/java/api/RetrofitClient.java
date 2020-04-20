@@ -11,7 +11,7 @@ public class RetrofitClient {
     public static Retrofit getInstance(){
         if(retrofit == null)
             retrofit = new Retrofit.Builder()
-                    .baseUrl("https://www.catholix.com.ng/api.developer/GET/")
+                    .baseUrl("https://www.catholix.com.ng/api.developer/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .build();

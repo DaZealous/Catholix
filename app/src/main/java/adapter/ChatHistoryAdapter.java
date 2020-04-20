@@ -7,6 +7,7 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -57,6 +58,11 @@ public class ChatHistoryAdapter extends RecyclerView.Adapter<ChatHistoryAdapter.
         Conv conv = convs.get(position);
         final String[] username = new String[1];
         final String[] img_url = new String[1];
+        holder.imgMsgType.setVisibility(View.GONE);
+        holder.textTyping.setText("");
+        holder.textTyping.setVisibility(View.GONE);
+        holder.textMessage.setVisibility(View.VISIBLE);
+        holder.textOnline.setVisibility(View.GONE);
         DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference().child("messages").child(SharedPref.getInstance(context).getId()).child(id);
         Query messageQuery = chatRef.limitToLast(1);
         DatabaseReference mUsersDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(id);
@@ -74,12 +80,34 @@ public class ChatHistoryAdapter extends RecyclerView.Adapter<ChatHistoryAdapter.
                         holder.textSeen.setText("new");
                         holder.textSeen.setVisibility(View.VISIBLE);
                     }
-                    if(message.getMsg_type().equalsIgnoreCase("image"))
+                    if(message.getMsg_type().equalsIgnoreCase("image")) {
+                        holder.imgMsgType.setImageResource(R.drawable.ic_image_grey_24dp);
+                        holder.imgMsgType.setVisibility(View.VISIBLE);
                         holder.textMessage.setText("image");
-                    else if(message.getMsg_type().equalsIgnoreCase("audio"))
+                    }
+                    else if(message.getMsg_type().equalsIgnoreCase("audio")) {
+                        holder.imgMsgType.setImageResource(R.drawable.ic_keyboard_voice_drey_24dp);
+                        holder.imgMsgType.setVisibility(View.VISIBLE);
                         holder.textMessage.setText("audio");
-                    else
-                    holder.textMessage.setText(message.getMsg_body());
+                    }
+                    else if(message.getMsg_type().equalsIgnoreCase("video")) {
+                        holder.imgMsgType.setImageResource(R.drawable.ic_videocam_grey_24dp);
+                        holder.imgMsgType.setVisibility(View.VISIBLE);
+                        holder.textMessage.setText("video");
+                    }
+                    else if(message.getMsg_type().equalsIgnoreCase("document")){
+                        holder.imgMsgType.setImageResource(R.drawable.ic_insert_drive_file_grey_24dp);
+                        holder.imgMsgType.setVisibility(View.VISIBLE);
+                        holder.textMessage.setText("file");
+                    }else if(message.getMsg_type().equalsIgnoreCase("contact")){
+                        holder.imgMsgType.setImageResource(R.drawable.ic_perm_contact_calendar_grey_24dp);
+                        holder.imgMsgType.setVisibility(View.VISIBLE);
+                        holder.textMessage.setText(message.getMsg_name());
+                    }
+                    else{
+                        holder.imgMsgType.setVisibility(View.GONE);
+                        holder.textMessage.setText(message.getMsg_body());
+                    }
                     holder.textTime.setText(DateUtils.getRelativeTimeSpanString(message.getTime_stamp()));
                 }else{
                     notifyItemRemoved(position);
@@ -116,6 +144,7 @@ public class ChatHistoryAdapter extends RecyclerView.Adapter<ChatHistoryAdapter.
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 try {
+                                    holder.imgMsgType.setVisibility(View.GONE);
                                     holder.textMessage.setText(dataSnapshot.child("admin").getValue(String.class).equals(SharedPref.getInstance(context).getId()) ? "Group created" : "You were added");
                                     holder.textTime.setText(DateUtils.getRelativeTimeSpanString(dataSnapshot.child("created_at").getValue(Long.class)));
                                 } catch (Exception e) {
@@ -150,12 +179,34 @@ public class ChatHistoryAdapter extends RecyclerView.Adapter<ChatHistoryAdapter.
                             holder.textSeen.setText("new");
                             holder.textSeen.setVisibility(View.VISIBLE);
                         }
-                        if (message.getMsg_type().equalsIgnoreCase("image"))
+                        if (message.getMsg_type().equalsIgnoreCase("image")) {
+                            holder.imgMsgType.setImageResource(R.drawable.ic_image_grey_24dp);
+                            holder.imgMsgType.setVisibility(View.VISIBLE);
                             holder.textMessage.setText("image");
-                        else if (message.getMsg_type().equalsIgnoreCase("audio"))
+                        }
+                        else if (message.getMsg_type().equalsIgnoreCase("audio")) {
+                            holder.imgMsgType.setImageResource(R.drawable.ic_keyboard_voice_drey_24dp);
+                            holder.imgMsgType.setVisibility(View.VISIBLE);
                             holder.textMessage.setText("audio");
-                        else
+                        }
+                        else if(message.getMsg_type().equalsIgnoreCase("video")) {
+                            holder.imgMsgType.setImageResource(R.drawable.ic_videocam_grey_24dp);
+                            holder.imgMsgType.setVisibility(View.VISIBLE);
+                            holder.textMessage.setText("video");
+                        }
+                        else if(message.getMsg_type().equalsIgnoreCase("document")){
+                            holder.imgMsgType.setImageResource(R.drawable.ic_insert_drive_file_grey_24dp);
+                            holder.imgMsgType.setVisibility(View.VISIBLE);
+                            holder.textMessage.setText("file");
+                        }else if(message.getMsg_type().equalsIgnoreCase("contact")){
+                            holder.imgMsgType.setImageResource(R.drawable.ic_perm_contact_calendar_grey_24dp);
+                            holder.imgMsgType.setVisibility(View.VISIBLE);
+                            holder.textMessage.setText(message.getMsg_name());
+                        }
+                        else {
+                            holder.imgMsgType.setVisibility(View.GONE);
                             holder.textMessage.setText(message.getFrom().equals(SharedPref.getInstance(context).getId()) ? "you : " + message.getMsg_body() : message.getFromUsername().split(" ")[0].toLowerCase() + " : " + message.getMsg_body());
+                        }
                         holder.textTime.setText(DateUtils.getRelativeTimeSpanString(message.getTime_stamp()));
                     } else {
                         notifyItemRemoved(position);
@@ -212,7 +263,7 @@ public class ChatHistoryAdapter extends RecyclerView.Adapter<ChatHistoryAdapter.
                 String typing = dataSnapshot.getValue(String.class);
                 if (!TextUtils.isEmpty(typing))
                     if (typing.equals("true")) {
-
+                        holder.imgMsgType.setVisibility(View.GONE);
                         holder.textTyping.setText("typing...");
                         holder.textTyping.setVisibility(View.VISIBLE);
                         holder.textMessage.setVisibility(View.GONE);
@@ -272,6 +323,7 @@ public class ChatHistoryAdapter extends RecyclerView.Adapter<ChatHistoryAdapter.
         TextView textUsername, textMessage, textTime, textSeen, textTyping, textOnline;
         CircleImageView circleImageView;
         LinearLayout linearLayout;
+        ImageView imgMsgType;
 
         private viewHolder(@NonNull View itemView) {
             super(itemView);
@@ -283,6 +335,7 @@ public class ChatHistoryAdapter extends RecyclerView.Adapter<ChatHistoryAdapter.
             linearLayout = itemView.findViewById(R.id.user_chat_history_linear_layout);
             textTyping = itemView.findViewById(R.id.user_chat_history_text_typing);
             textOnline = itemView.findViewById(R.id.user_chat_history_text_online);
+            imgMsgType = itemView.findViewById(R.id.user_chat_history_img_msg_type);
         }
 
         private void startChat(String id, String username, String img_url) {

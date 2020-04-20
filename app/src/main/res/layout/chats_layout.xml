@@ -35,10 +35,31 @@
             tools:targetApi="lollipop" />
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="30dp"
+                android:layout_height="35dp"
                 android:background="@color/black"
                 android:alpha="0.7"
                 android:layout_alignParentBottom="true"/>
+            <ProgressBar
+                android:visibility="invisible"
+                android:id="@+id/chat_video_admin_progress_bar"
+                android:theme="@style/BarTheme"
+                android:layout_alignParentEnd="true"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="2dp"/>
+            <ImageButton
+                android:visibility="invisible"
+                android:id="@+id/chat_video_admin_download_play_btn"
+                android:layout_alignParentEnd="true"
+                android:layout_width="22dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_file_download_white_24dp"
+                android:layout_alignParentBottom="true"
+                android:background="@android:color/transparent"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="5dp"/>
             <TextView
                 android:fontFamily="@font/rokkitt_regular"
                 android:textColor="@color/white"
@@ -136,9 +157,130 @@
                     android:textSize="12sp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/chat_admin_card_file"
+            android:layout_marginEnd="65dp"
+            android:layout_marginTop="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            app:cardBackgroundColor="@color/colorPrimary"
+            app:cardCornerRadius="15dp">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                >
+
+                <ImageView
+                    android:id="@+id/chat_admin_file_img"
+                    android:layout_width="40dp"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_insert_drive_file_white_24dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="22dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_toEndOf="@id/chat_admin_file_img"
+                    android:id="@+id/chat_admin_file_text_name"
+                    android:text=""
+                    android:layout_marginTop="15dp"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/rokkitt_regular"
+                    android:textSize="16sp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="20dp"
+                    android:id="@+id/chat_admin_file_text_time"
+                    android:text=""
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/rokkitt_regular"
+                    android:textColor="@color/black"
+                    android:layout_marginBottom="10dp"
+                    android:textSize="13sp"/>
+
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/chat_admin_card_contact"
+            android:layout_marginEnd="65dp"
+            android:layout_marginTop="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            app:cardBackgroundColor="@color/colorPrimary"
+            app:cardCornerRadius="15dp">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                >
+
+                <ImageView
+                    android:id="@+id/chat_admin_contact_img"
+                    android:layout_width="40dp"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_person_white_24dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="22dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_toEndOf="@id/chat_admin_contact_img"
+                    android:id="@+id/chat_admin_contact_text_name"
+                    android:text=""
+                    android:layout_marginTop="12dp"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/rokkitt_regular"
+                    android:textSize="16sp"/>
+
+                <Button
+                    android:background="@android:color/transparent"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_below="@+id/chat_admin_contact_text_name"
+                    android:layout_toEndOf="@id/chat_admin_contact_img"
+                    android:id="@+id/chat_admin_contact_view_btn"
+                    android:text="View"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/rokkitt_regular"
+                    android:textSize="16sp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="20dp"
+                    android:id="@+id/chat_admin_contact_text_time"
+                    android:text=""
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/rokkitt_regular"
+                    android:textColor="@color/black"
+                    android:layout_marginBottom="10dp"
+                    android:textSize="13sp"/>
+
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
     </LinearLayout>
 
     <RelativeLayout
+        android:visibility="gone"
         android:layout_below="@+id/chat_layout_admin_layout"
         android:id="@+id/chat_layout_user_layout"
         android:layout_marginTop="10dp"
@@ -149,7 +291,7 @@
             android:layout_alignParentEnd="true"
             android:clickable="true"
             android:id="@+id/chat_user_img_card"
-            android:layout_gravity="right"
+            android:layout_gravity="end"
             android:layout_width="200dp"
             android:layout_height="240dp"
             app:cardCornerRadius="15dp">
@@ -169,10 +311,31 @@
                     tools:targetApi="lollipop" />
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="30dp"
+                    android:layout_height="35dp"
                     android:background="@color/black"
                     android:alpha="0.7"
                     android:layout_alignParentBottom="true"/>
+                <ProgressBar
+                    android:visibility="invisible"
+                    android:id="@+id/chat_video_user_progress_bar"
+                    android:theme="@style/BarTheme"
+                    android:layout_alignParentStart="true"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginBottom="2dp"/>
+                <ImageButton
+                    android:visibility="invisible"
+                    android:id="@+id/chat_video_user_download_play_btn"
+                    android:layout_alignParentStart="true"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_file_download_white_24dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@android:color/transparent"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginBottom="6dp"/>
                 <TextView
                     android:fontFamily="@font/rokkitt_regular"
                     android:textColor="@color/white"
@@ -182,7 +345,7 @@
                     android:layout_height="wrap_content"
                     android:text="two hrs ago"
                     android:textSize="12sp"
-                    android:layout_margin="7dp"
+                    android:layout_margin="8dp"
                     android:layout_alignParentBottom="true"/>
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
@@ -283,5 +446,127 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <androidx.cardview.widget.CardView
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/chat_user_card_audio"
+            android:id="@+id/chat_user_card_file"
+            android:layout_marginStart="65dp"
+            android:layout_marginTop="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            app:cardBackgroundColor="@color/colorPrimary"
+            app:cardCornerRadius="15dp">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                >
+
+                <ImageView
+                    android:id="@+id/chat_user_file_img"
+                    android:layout_width="40dp"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_insert_drive_file_white_24dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="22dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_toEndOf="@id/chat_user_file_img"
+                    android:id="@+id/chat_user_file_text_name"
+                    android:text=""
+                    android:layout_marginTop="15dp"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/rokkitt_regular"
+                    android:textSize="16sp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="20dp"
+                    android:id="@+id/chat_user_file_text_time"
+                    android:text=""
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/rokkitt_regular"
+                    android:textColor="@color/black"
+                    android:layout_marginBottom="10dp"
+                    android:textSize="13sp"/>
+
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/chat_user_card_file"
+            android:id="@+id/chat_user_card_contact"
+            android:layout_marginStart="65dp"
+            android:layout_marginTop="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            app:cardBackgroundColor="@color/colorPrimary"
+            app:cardCornerRadius="15dp">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                >
+
+                <ImageView
+                    android:id="@+id/chat_user_contact_img"
+                    android:layout_width="40dp"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_person_white_24dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="22dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_toEndOf="@id/chat_user_contact_img"
+                    android:id="@+id/chat_user_contact_text_name"
+                    android:text=""
+                    android:layout_marginTop="15dp"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/rokkitt_regular"
+                    android:textSize="16sp"/>
+
+                <Button
+                    android:background="@android:color/transparent"
+                    android:layout_width="50dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_below="@+id/chat_user_contact_text_name"
+                    android:layout_toEndOf="@id/chat_user_contact_img"
+                    android:id="@+id/chat_user_contact_view_btn"
+                    android:text="View"
+                    android:layout_marginTop="3dp"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/rokkitt_regular"
+                    android:textSize="16sp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="20dp"
+                    android:id="@+id/chat_user_contact_text_time"
+                    android:text=""
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+                    android:fontFamily="@font/rokkitt_regular"
+                    android:textColor="@color/black"
+                    android:layout_marginBottom="10dp"
+                    android:textSize="13sp"/>
+
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
     </RelativeLayout>
 </RelativeLayout>

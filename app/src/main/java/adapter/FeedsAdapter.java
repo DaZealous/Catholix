@@ -59,6 +59,8 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.viewHolder>{
         holder.textUsername.setText(feed.getFname());
         holder.textTime.setText(feed.getAddedOn());
         holder.textCaption.setText(android.text.Html.fromHtml(feed.getMessage()));
+        Glide.with(context).clear(holder.imgProfile);
+        Glide.with(context).clear(holder.feedImage);
         if(feed.getPhoto() == null){
             holder.feedImage.setVisibility(View.GONE);
             holder.videoView.setVisibility(View.GONE);
@@ -76,17 +78,12 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.viewHolder>{
             }
         }
        holder.getData(feed.getUserId());
-        holder.textContinue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                context.startActivity(new Intent(context, PostView.class)
-                        .putExtra("userId", feed.getUserId())
-                .putExtra("username", feed.getFname())
-                .putExtra("caption", feed.getMessage())
-                .putExtra("time", feed.getAddedOn())
-                .putExtra("image", feed.getPhoto()));
-            }
-        });
+        holder.textContinue.setOnClickListener(view -> context.startActivity(new Intent(context, PostView.class)
+                .putExtra("userId", feed.getUserId())
+        .putExtra("username", feed.getFname())
+        .putExtra("caption", feed.getMessage())
+        .putExtra("time", feed.getAddedOn())
+        .putExtra("image", feed.getPhoto())));
     }
 
     @Override
@@ -131,22 +128,17 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.viewHolder>{
             try {
                 JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, "https://www.catholix.com.ng/api.developer/GET/req.php?qdata=id&id="+id+"&table=users",
                         null,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject object) {
-                                try {
-                                    Glide.with(context).load("https://www.catholix.com.ng/files/images/profilepics/"+object.getString("Photo")).placeholder(R.drawable.ic_person_profile_24dp).into(imgProfile);
-                                } catch (JSONException e) {
-                                  //  Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
-                                }
+                        object -> {
+                            try {
+                                Glide.with(context).clear(imgProfile);
+                                Glide.with(context).load("https://www.catholix.com.ng/files/images/profilepics/"+object.getString("Photo")).placeholder(R.drawable.ic_person_profile_24dp).into(imgProfile);
+                            } catch (JSONException e) {
+                              //  Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
 
-                            }
                         },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                               // Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
+                        error -> {
+                           // Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
                         });
                 VolleyInstance.getInstance(context).addToQueue(request);
             } catch (Exception e) {

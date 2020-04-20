@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -73,6 +74,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
     @Override
     public void onBindViewHolder(@NonNull viewHolder holder, int position) {
         try {
+            holder.adminPlayVideoBtn.setVisibility(View.INVISIBLE);
+            holder.userPlayVideoBtn.setVisibility(View.INVISIBLE);
+            holder.userVideoBar.setVisibility(View.INVISIBLE);
+            holder.adminVideoBar.setVisibility(View.INVISIBLE);
+
             ChatDao dao = list.get(position);
             holder.checkUser(dao.getFrom());
             holder.checkType(dao.getMsg_type(), dao.getMsg_body(), dao.getMsg_name());
@@ -89,26 +95,46 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
             handler = new Handler();
 
             holder.imgLayout1.setOnClickListener(view -> {
-                //Toast.makeText(context, "clicked", Toast.LENGTH_SHORT).show();
-                if (holder.chatAdminImg.getDrawable() != null) {
-                    Bitmap bitmap = ((BitmapDrawable) holder.chatAdminImg.getDrawable()).getBitmap();
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                    final byte[] thumb_byte = stream.toByteArray();
-                    holder.viewImg(thumb_byte, holder.chatAdminImg
-                            , dao.getToUsername(), dao.getTime_stamp(), chatsView.getUserPhoto());
+                if(dao.getMsg_type().equalsIgnoreCase("image")) {
+                    if (holder.chatAdminImg.getDrawable() != null) {
+                        Bitmap bitmap = ((BitmapDrawable) holder.chatAdminImg.getDrawable()).getBitmap();
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                        final byte[] thumb_byte = stream.toByteArray();
+                        holder.viewImg(thumb_byte, holder.chatAdminImg
+                                , dao.getToUsername(), dao.getTime_stamp(), chatsView.getUserPhoto());
+                    }
+                }else{
+                    File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Catholix/" + dao.getMsg_name());
+                    if (file.exists()) {
+                        holder.viewVideo(file.getAbsolutePath(),
+                                dao.getFromUsername(), dao.getTime_stamp(), chatsView.getUserPhoto());
+                    } else {
+                        holder.downloadVideo(dao.getMsg_name(), dao.getMsg_body());
+                    }
                 }
             });
+
+
             holder.imgLayout2.setOnClickListener(view -> {
-                // Toast.makeText(context, "clicked 2", Toast.LENGTH_SHORT).show();
-                if (holder.chatUserImg.getDrawable() != null) {
-                    Bitmap bitmap = ((BitmapDrawable) holder.chatUserImg.getDrawable()).getBitmap();
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                    final byte[] thumb_byte = stream.toByteArray();
-                    holder.viewImg(thumb_byte, holder.chatUserImg
-                            , dao.getFromUsername(), dao.getTime_stamp(), chatsView.getUserPhoto());
-                }
+               if(dao.getMsg_type().equalsIgnoreCase("image")) {
+                   if (holder.chatUserImg.getDrawable() != null) {
+                       Bitmap bitmap = ((BitmapDrawable) holder.chatUserImg.getDrawable()).getBitmap();
+                       ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                       bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                       final byte[] thumb_byte = stream.toByteArray();
+                       holder.viewImg(thumb_byte, holder.chatUserImg
+                               , dao.getFromUsername(), dao.getTime_stamp(), chatsView.getUserPhoto());
+                   }
+               }else{
+                   File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Catholix/" + dao.getMsg_name());
+                   if (file.exists()) {
+                       holder.viewVideo(file.getAbsolutePath(),
+                               dao.getFromUsername(), dao.getTime_stamp(), chatsView.getUserPhoto());
+                   } else {
+                       holder.downloadVideo(dao.getMsg_name(), dao.getMsg_body());
+                   }
+               }
             });
 
             holder.userAudioPlayBtn.setOnClickListener(view -> {
@@ -279,6 +305,26 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
                 builder.create().show();
                 return true;
             });
+
+            holder.userPlayVideoBtn.setOnClickListener(view -> {
+                File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Catholix/" + dao.getMsg_name());
+                if (file.exists()) {
+                    holder.viewVideo(file.getAbsolutePath(),
+                            dao.getFromUsername(), dao.getTime_stamp(), chatsView.getUserPhoto());
+                } else {
+                    holder.downloadVideo(dao.getMsg_name(), dao.getMsg_body());
+                }
+            });
+
+            holder.adminPlayVideoBtn.setOnClickListener(view1 -> {
+                File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Catholix/" + dao.getMsg_name());
+                if (file.exists()) {
+                    holder.viewVideo(file.getAbsolutePath(),
+                            dao.getFromUsername(), dao.getTime_stamp(), chatsView.getUserPhoto());
+                } else {
+                    holder.downloadVideo(dao.getMsg_name(), dao.getMsg_body());
+                }
+            });
         } catch (Exception e) {
             Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
@@ -297,8 +343,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
         CardView imgUser, imgAdmin, textAdminCard, textUserCard, cardAdminAudio, cardUserAudio;
         TextView textUser, textAdmin, adminTime, userTime, imgChatUserTime, imgChatAdminTime, adminAudioTime, userAudioTime;
         ImageView chatAdminImg, chatUserImg;
-        ImageButton adminAudioPlayBtn, userAudioPlayBtn;
+        ImageButton adminAudioPlayBtn, userAudioPlayBtn, adminPlayVideoBtn, userPlayVideoBtn;
         SeekBar adminAudioSeekBar, userAudioSeekBar;
+        ProgressBar adminVideoBar, userVideoBar;
 
         private viewHolder(@NonNull View itemView) {
             super(itemView);
@@ -326,6 +373,10 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
             adminAudioPlayBtn = itemView.findViewById(R.id.chat_admin_audio_play_btn);
             adminAudioSeekBar = itemView.findViewById(R.id.chat_admin_audio_seek_bar);
             userAudioSeekBar = itemView.findViewById(R.id.chat_user_audio_seek_bar);
+            adminVideoBar = itemView.findViewById(R.id.chat_video_admin_progress_bar);
+            userVideoBar = itemView.findViewById(R.id.chat_video_user_progress_bar);
+            adminPlayVideoBtn = itemView.findViewById(R.id.chat_video_admin_download_play_btn);
+            userPlayVideoBtn = itemView.findViewById(R.id.chat_video_user_download_play_btn);
         }
 
         private void setTextUser(String text) {
@@ -372,6 +423,32 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
                 textUserCard.setVisibility(View.GONE);
                 cardUserAudio.setVisibility(View.GONE);
                 cardAdminAudio.setVisibility(View.GONE);
+                userPlayVideoBtn.setVisibility(View.INVISIBLE);
+                adminPlayVideoBtn.setVisibility(View.INVISIBLE);
+            } else if (msg_type.equalsIgnoreCase("video")) {
+                imgAdmin.setVisibility(View.VISIBLE);
+                imgUser.setVisibility(View.VISIBLE);
+                textAdminCard.setVisibility(View.GONE);
+                textUserCard.setVisibility(View.GONE);
+                cardUserAudio.setVisibility(View.GONE);
+                cardAdminAudio.setVisibility(View.GONE);
+
+                userPlayVideoBtn.setVisibility(View.VISIBLE);
+                adminPlayVideoBtn.setVisibility(View.VISIBLE);
+
+                File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Catholix/" + msg_name);
+                if (file.exists()) {
+                    Glide.with(context).load(file.getAbsolutePath()).into(chatAdminImg);
+                    Glide.with(context).load(file.getAbsolutePath()).into(chatUserImg);
+                    userPlayVideoBtn.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                    adminPlayVideoBtn.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                } else {
+                    Glide.with(context).load(img).into(chatAdminImg);
+                    Glide.with(context).load(img).into(chatUserImg);
+                    userPlayVideoBtn.setImageResource(R.drawable.ic_file_download_white_24dp);
+                    adminPlayVideoBtn.setImageResource(R.drawable.ic_file_download_white_24dp);
+                }
+
             } else {
                 textAdminCard.setVisibility(View.GONE);
                 textUserCard.setVisibility(View.GONE);
@@ -396,7 +473,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
             ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context,
                     imgAdmin, "image");
             context.startActivity(new Intent(context, FileViewer.class).putExtra("username", username)
-                    .putExtra("photo", thumb_byte).putExtra("time", time).putExtra("img_url", img), optionsCompat.toBundle());
+                    .putExtra("photo", thumb_byte).putExtra("time", time).putExtra("img_url", img).putExtra("type", "image"), optionsCompat.toBundle());
         }
 
         private void downloadAudio(String file, String msgBody) throws NullPointerException {
@@ -455,6 +532,38 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
                     });
                 });
             });
+        }
+
+        private void viewVideo(String filePath, String fromUsername, long time_stamp, String userPhoto) {
+            context.startActivity(new Intent(context, FileViewer.class).putExtra("username", fromUsername)
+                    .putExtra("file", filePath).putExtra("time", time_stamp).putExtra("img_url", userPhoto).putExtra("type", "video"));
+        }
+
+        private void downloadVideo(String file, String msgBody) {
+            userVideoBar.setVisibility(View.VISIBLE);
+            adminVideoBar.setVisibility(View.VISIBLE);
+            userPlayVideoBtn.setVisibility(View.INVISIBLE);
+            adminPlayVideoBtn.setVisibility(View.INVISIBLE);
+            DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(msgBody));
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+            request.setDestinationInExternalPublicDir("/Catholix", file);
+            downloadManager.enqueue(request);
+            BroadcastReceiver onComplete = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    try {
+                        userVideoBar.setVisibility(View.INVISIBLE);
+                        adminVideoBar.setVisibility(View.INVISIBLE);
+                        userPlayVideoBtn.setVisibility(View.VISIBLE);
+                        adminPlayVideoBtn.setVisibility(View.VISIBLE);
+                        userPlayVideoBtn.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                        adminPlayVideoBtn.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                    } catch (Exception e) {
+                    }
+                }
+            };
+            context.getApplicationContext().registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         }
     }
 }

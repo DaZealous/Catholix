@@ -16,7 +16,7 @@
         android:scaleType="fitXY"
         android:layout_width="140dp"
         android:layout_height="140dp"
-        android:src="@mipmap/catholix_logo"
+        android:src="@mipmap/app_logo"
         android:layout_centerInParent="true"
         tools:targetApi="lollipop" />
 

@@ -16,6 +16,6 @@ import retrofit2.http.POST;
 import retrofit2.http.Path;
 
 public interface UserService {
-    @GET("req.php?qdata=all&table=users")
+    @GET("GET/req.php?qdata=all&table=users")
     Call<List<Users>>getUsers();
 }

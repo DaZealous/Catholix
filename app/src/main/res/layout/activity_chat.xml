@@ -162,6 +162,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
                 <ImageButton
+                    android:id="@+id/activity_chat_document_file_pick"
                     android:src="@drawable/ic_insert_drive_file_white_24dp"
                     android:background="@drawable/round_circle_blue"
                     android:layout_width="50dp"
@@ -183,6 +184,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
                 <ImageButton
+                    android:id="@+id/activity_chat_contact_file_pick"
                     android:src="@drawable/ic_perm_contact_calendar_white_24dp"
                     android:background="@drawable/round_circle"
                     android:layout_width="50dp"
@@ -211,6 +213,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
                 <ImageButton
+                    android:id="@+id/activity_chat_video_file_pick"
                     android:src="@drawable/ic_videocam_white_24dp"
                     android:background="@drawable/round_circle_purple"
                     android:layout_width="50dp"

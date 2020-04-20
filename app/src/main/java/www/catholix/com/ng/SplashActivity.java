@@ -12,10 +12,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import config.SharedPref;
@@ -93,15 +91,15 @@ public class SplashActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE) {
             if (grantResults.length != 0) {
-               List<Integer> list = new ArrayList<>();
+                List<Integer> list = new ArrayList<>();
 
                 for (int i : grantResults) {
                     list.add(i);
                 }
 
-                if(list.contains(PackageManager.PERMISSION_DENIED)){
+                if (list.contains(PackageManager.PERMISSION_DENIED)) {
                     askForMultiplePermissions();
-                }else{
+                } else {
                     handler.postDelayed(() -> {
                         layout.clearAnimation();
                         if (SharedPref.getInstance(SplashActivity.this).getUser().isEmpty()) {

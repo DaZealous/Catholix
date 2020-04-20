@@ -1,7 +1,9 @@
 package www.catholix.com.ng;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
@@ -36,6 +38,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -43,9 +46,20 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
+import Service.FeedsService;
+import api.RetrofitClient;
 import api.VolleyInstance;
 import config.NetworkConfig;
 import config.SharedPref;
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -61,6 +75,9 @@ public class PostFragment extends BottomSheetDialogFragment {
     private TextInputEditText postEdit;
     private Button btnPost;
     private String image;
+    private File imageFile;
+    private ResponseBody responseBody;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -106,8 +123,7 @@ public class PostFragment extends BottomSheetDialogFragment {
            }
        });
        pickImage.setOnClickListener(view1 -> {
-           Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-           intent.setType("image/*");
+           Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
            startActivityForResult(Intent.createChooser(intent, "SELECT IMAGE"), RC_IMG_PICK);
 
        });
@@ -120,87 +136,55 @@ public class PostFragment extends BottomSheetDialogFragment {
             btnPost.setAlpha(0.6f);
             btnPost.setEnabled(false);
 
-            Map<String, String> map = new HashMap<>();
-            map.put("feed_media", image);
-            map.put("title", "post");
-            map.put("userID", SharedPref.getInstance(getContext()).getId());
-            map.put("category", "2");
-            map.put("reach", "3");
-            map.put("article", postEdit.getText().toString());
-            map.put("post_feed_req", "set");
-            StringRequest request = new StringRequest(Request.Method.POST, "https://www.catholix.com.ng/api.developer/POST/post_feeds.php",
-                    response -> {
-                        try {
-                                Toast.makeText(getContext(), String.valueOf(response), Toast.LENGTH_SHORT).show();
-                            btnPost.setAlpha(1f);
-                            btnPost.setEnabled(true);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    },
-                    error -> {
-                        NetworkResponse response = error.networkResponse;
-                        try {
-                            String res = new String(response.data,
-                                    HttpHeaderParser.parseCharset(response.headers, "utf-8"));
-                            Toast.makeText(getContext(), res, Toast.LENGTH_SHORT).show();
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        }
-                        btnPost.setAlpha(1f);
-                        btnPost.setEnabled(true);
-                    }
-            ) {
-                @Override
-                public byte[] getBody() throws AuthFailureError {
-                    /*ByteArrayOutputStream stream = null;
-                    try {
-                     stream = new ByteArrayOutputStream();
-                        ObjectOutputStream out = new ObjectOutputStream(stream);
-                        out.writeObject(map);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }*/
-                    try {
-                        return map.toString().getBytes("utf-8");
-                    } catch (UnsupportedEncodingException e) {
-                        VolleyLog.wtf("Unsupported Encoding while trying to get the bytes of %s using %s", map.toString(), "utf-8");
-                        return null;
-                    }
-                }
+            imageFile = new File(image);
 
-                /*@Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> params = new HashMap<>();
-                    params.put("Content-Type", "x-www-form-urlencoded");
-                    return params;
-                }
+            try {
+                FeedsService service = RetrofitClient.getInstance().create(FeedsService.class);
+                Observable<ResponseBody> call = service.postNewsFeed(imageFile, "post", SharedPref.getInstance(getContext()).getId(),
+                        "2", "3", postEdit.getText().toString(), "set")
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeOn(Schedulers.io());
 
-                @Override
-                public String getBodyContentType() {
-                    return "x-www-form-urlencoded";
-                }*/
+               call.subscribe(new Observer<ResponseBody>() {
+                   @Override
+                   public void onSubscribe(Disposable d) {
 
-               /* @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> map = new HashMap<>();
-                    map.put("feed_media", image);
-                    map.put("title", "post");
-                    map.put("userID", SharedPref.getInstance(getContext()).getId());
-                    map.put("category", "2");
-                    map.put("reach", "3");
-                    map.put("article", postEdit.getText().toString());
-                    map.put("post_feed_req", "set");
-                    return map;
-                }*/
-            };
+                   }
 
-            RetryPolicy policy = new DefaultRetryPolicy(30000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-            request.setRetryPolicy(policy);
-            VolleyInstance.getInstance(getContext()).addToQueue(request);
+                   @Override
+                   public void onNext(ResponseBody value) {
+                       responseBody = value;
+                       btnPost.setAlpha(1);
+                       btnPost.setEnabled(true);
+                       try {
+                           Toast.makeText(getContext(), value.string(), Toast.LENGTH_SHORT).show();
+                       } catch (IOException e) {
+                           Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                       }
+                   }
+
+                   @Override
+                   public void onError(Throwable e) {
+                       btnPost.setAlpha(1);
+                       btnPost.setEnabled(true);
+                       Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                   }
+
+                   @Override
+                   public void onComplete() {
+                       btnPost.setAlpha(1);
+                       btnPost.setEnabled(true);
+                       try {
+                           Toast.makeText(getContext(), responseBody.string(), Toast.LENGTH_SHORT).show();
+                       } catch (IOException e) {
+                           Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                       }
+                   }
+               });
+            } catch (Exception e) {
+                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+
         }else
             Toast.makeText(getContext(), "no internet connection", Toast.LENGTH_SHORT).show();
     }
@@ -210,17 +194,25 @@ public class PostFragment extends BottomSheetDialogFragment {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == RC_IMG_PICK && resultCode == RESULT_OK){
             Uri filePath = data.getData();
-            Glide.with(getContext()).load(filePath).into(pickImgView);
+           // Glide.with(getContext()).load(filePath).into(pickImgView);
             try{
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), filePath);
-                Bitmap lastBitmap = null;
+                /*Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), filePath);
+                pickImgView.setImageBitmap(bitmap);
+                Bitmap lastBitmap;
                 lastBitmap = bitmap;
-                image = getStringImage(lastBitmap);
+                image = getStringImage(lastBitmap);*/
                // Toast.makeText(getContext(), image, Toast.LENGTH_SHORT).show();
+                String[] filePathColumn = {MediaStore.Images.Media.DATA};
+                Cursor cursor = getContext().getContentResolver().query(filePath, filePathColumn, null, null, null, null);
+                assert cursor != null;
+                cursor.moveToFirst();
+                int index = cursor.getColumnIndex(filePathColumn[0]);
+                image = cursor.getString(index);
+                pickImgView.setImageBitmap(BitmapFactory.decodeFile(image));
+                cursor.close();
             }catch (Exception e){
 
             }
-            //pickImgView.setImageURI(data.getData());
         }
     }
 

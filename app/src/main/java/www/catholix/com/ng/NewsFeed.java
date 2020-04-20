@@ -28,6 +28,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +40,10 @@ import api.VolleyInstance;
 import config.NetworkConfig;
 import config.SharedPref;
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import model.Feeds;
@@ -60,6 +63,7 @@ public class NewsFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
     private TextView youtMindBtn, notifyText;
     private PostFragment fragment;
     private RelativeLayout notificationBtn;
+    private List<Feeds> feed;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -163,15 +167,33 @@ public class NewsFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
         list.clear();
         try {
             if (isInternetAvailable(getContext())) {
-                disposable.add(
                         feedsService.getNewsFeeds()
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(feed -> {
-                                    list.addAll(feed);
-                                    adapter.notifyDataSetChanged();
-                                    layout.setRefreshing(false);
-                                }));
+                                .subscribe(new Observer<List<Feeds>>() {
+                                    @Override
+                                    public void onSubscribe(Disposable d) {
+                                        disposable.add(d);
+                                    }
+
+                                    @Override
+                                    public void onNext(List<Feeds> value) {
+                                        feed = value;
+                                    }
+
+                                    @Override
+                                    public void onError(Throwable e) {
+                                        layout.setRefreshing(false);
+                                        e.printStackTrace();
+                                    }
+
+                                    @Override
+                                    public void onComplete() {
+                                        list.addAll(feed);
+                                        adapter.notifyDataSetChanged();
+                                        layout.setRefreshing(false);
+                                    }
+                                });
             } else {
                 Toast.makeText(getContext(), "No internet connection", Toast.LENGTH_SHORT).show();
                 layout.setRefreshing(false);
@@ -188,4 +210,10 @@ public class NewsFeed extends Fragment implements SwipeRefreshLayout.OnRefreshLi
                 && manager.getActiveNetworkInfo().isConnectedOrConnecting();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        disposable.clear();
+        disposable.dispose();
+    }
 }
