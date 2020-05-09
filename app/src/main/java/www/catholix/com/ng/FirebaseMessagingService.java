@@ -21,6 +21,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.Map;
 
 import config.NotifyChannel;
+import config.SharedPref;
 
 import static config.NotifyChannel.ANDROID_CHANNEL_ID;
 
@@ -28,122 +29,123 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        Map<String, String> data = remoteMessage.getData();
+        if (!SharedPref.getInstance(FirebaseMessagingService.this).getMuteNotify()) {
+            Map<String, String> data = remoteMessage.getData();
 
-        String from = data.get("fromUserId");
-        String title = data.get("title");
-        String msg_body = data.get("body");
-        String icon = data.get("icon");
-        String click_action = data.get("click_action");
-        String msg_type = data.get("type");
+            String from = data.get("fromUserId");
+            String title = data.get("title");
+            String msg_body = data.get("body");
+            String icon = data.get("icon");
+            String click_action = data.get("click_action");
+            String msg_type = data.get("type");
 
-        Intent intent = new Intent(click_action);
-        intent.putExtra("userID", from)
-                .putExtra("username", title).putExtra("img_url", icon);
+            Intent intent = new Intent(click_action);
+            intent.putExtra("userID", from)
+                    .putExtra("username", title).putExtra("img_url", icon);
 
-        final Bitmap[] bitmap = {null};
+            final Bitmap[] bitmap = {null};
 
-        Glide.with(getApplicationContext())
-                .asBitmap()
-                .load(icon)
-                .into(new CustomTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+            Glide.with(getApplicationContext())
+                    .asBitmap()
+                    .load(icon)
+                    .into(new CustomTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
 
-                        bitmap[0] = resource;
-                        // TODO Do some work: pass this bitmap
-                        PendingIntent pendingIntent = PendingIntent.getActivity(FirebaseMessagingService.this,
-                                0,
-                                intent,
-                                PendingIntent.FLAG_UPDATE_CURRENT);
+                            bitmap[0] = resource;
+                            // TODO Do some work: pass this bitmap
+                            PendingIntent pendingIntent = PendingIntent.getActivity(FirebaseMessagingService.this,
+                                    0,
+                                    intent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT);
 
-                        int notificationId = (int) System.currentTimeMillis();
+                            int notificationId = (int) System.currentTimeMillis();
 
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            if (msg_type.equalsIgnoreCase("text")) {
-                                NotificationCompat.Builder nb = getAndroidChannelTextNotification(title, msg_body, ANDROID_CHANNEL_ID, bitmap[0]);
-                                nb.setContentIntent(pendingIntent);
-                                new NotifyChannel(FirebaseMessagingService.this).getManager().notify(notificationId, nb.build());
-                            } else if (msg_type.equalsIgnoreCase("image")) {
-                                Glide.with(getApplicationContext())
-                                        .asBitmap()
-                                        .load(msg_body)
-                                        .into(new CustomTarget<Bitmap>() {
-                                            @Override
-                                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                                NotificationCompat.Builder nb = getAndroidChannelImageNotification(title, resource, ANDROID_CHANNEL_ID, bitmap[0]);
-                                                nb.setContentIntent(pendingIntent);
-                                                new NotifyChannel(FirebaseMessagingService.this).getManager().notify(notificationId, nb.build());
-                                            }
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                if (msg_type.equalsIgnoreCase("text")) {
+                                    NotificationCompat.Builder nb = getAndroidChannelTextNotification(title, msg_body, ANDROID_CHANNEL_ID, bitmap[0]);
+                                    nb.setContentIntent(pendingIntent);
+                                    new NotifyChannel(FirebaseMessagingService.this).getManager().notify(notificationId, nb.build());
+                                } else if (msg_type.equalsIgnoreCase("image")) {
+                                    Glide.with(getApplicationContext())
+                                            .asBitmap()
+                                            .load(msg_body)
+                                            .into(new CustomTarget<Bitmap>() {
+                                                @Override
+                                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                                    NotificationCompat.Builder nb = getAndroidChannelImageNotification(title, resource, ANDROID_CHANNEL_ID, bitmap[0]);
+                                                    nb.setContentIntent(pendingIntent);
+                                                    new NotifyChannel(FirebaseMessagingService.this).getManager().notify(notificationId, nb.build());
+                                                }
 
-                                            @Override
-                                            public void onLoadCleared(@Nullable Drawable placeholder) {
+                                                @Override
+                                                public void onLoadCleared(@Nullable Drawable placeholder) {
 
-                                            }
-                                        });
-                            } else if (msg_type.equalsIgnoreCase("audio")) {
-                                NotificationCompat.Builder nb = getAndroidChannelTextNotification(title, "You received an audio file", ANDROID_CHANNEL_ID, bitmap[0]);
-                                nb.setContentIntent(pendingIntent);
-                                new NotifyChannel(FirebaseMessagingService.this).getManager().notify(notificationId, nb.build());
-                            } else if (msg_type.equalsIgnoreCase("video")) {
-                                NotificationCompat.Builder nb = getAndroidChannelTextNotification(title, "You received a video file", ANDROID_CHANNEL_ID, bitmap[0]);
-                                nb.setContentIntent(pendingIntent);
-                                new NotifyChannel(FirebaseMessagingService.this).getManager().notify(notificationId, nb.build());
+                                                }
+                                            });
+                                } else if (msg_type.equalsIgnoreCase("audio")) {
+                                    NotificationCompat.Builder nb = getAndroidChannelTextNotification(title, "You received an audio file", ANDROID_CHANNEL_ID, bitmap[0]);
+                                    nb.setContentIntent(pendingIntent);
+                                    new NotifyChannel(FirebaseMessagingService.this).getManager().notify(notificationId, nb.build());
+                                } else if (msg_type.equalsIgnoreCase("video")) {
+                                    NotificationCompat.Builder nb = getAndroidChannelTextNotification(title, "You received a video file", ANDROID_CHANNEL_ID, bitmap[0]);
+                                    nb.setContentIntent(pendingIntent);
+                                    new NotifyChannel(FirebaseMessagingService.this).getManager().notify(notificationId, nb.build());
+                                } else {
+                                    NotificationCompat.Builder nb = getAndroidChannelTextNotification(title, "You received a document file", ANDROID_CHANNEL_ID, bitmap[0]);
+                                    nb.setContentIntent(pendingIntent);
+                                    new NotifyChannel(FirebaseMessagingService.this).getManager().notify(notificationId, nb.build());
+                                }
+
+
                             } else {
-                                NotificationCompat.Builder nb = getAndroidChannelTextNotification(title, "You received a document file", ANDROID_CHANNEL_ID, bitmap[0]);
-                                nb.setContentIntent(pendingIntent);
-                                new NotifyChannel(FirebaseMessagingService.this).getManager().notify(notificationId, nb.build());
-                            }
+                                if (msg_type.equalsIgnoreCase("text")) {
+                                    NotificationCompat.Builder mBuilder = getAndroidChannelTextNotification(title, msg_body, from, bitmap[0]);
+                                    mBuilder.setContentIntent(pendingIntent);
+                                    NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                                    manager.notify(notificationId, mBuilder.build());
+                                } else if (msg_type.equalsIgnoreCase("image")) {
+                                    Glide.with(getApplicationContext())
+                                            .asBitmap()
+                                            .load(msg_body)
+                                            .into(new CustomTarget<Bitmap>() {
+                                                @Override
+                                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                                    NotificationCompat.Builder mBuilder = getAndroidChannelImageNotification(title, resource, from, bitmap[0]);
+                                                    mBuilder.setContentIntent(pendingIntent);
+                                                    NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                                                    manager.notify(notificationId, mBuilder.build());
+                                                }
 
+                                                @Override
+                                                public void onLoadCleared(@Nullable Drawable placeholder) {
 
-                        } else {
-                            if (msg_type.equalsIgnoreCase("text")) {
-                                NotificationCompat.Builder mBuilder = getAndroidChannelTextNotification(title, msg_body, from, bitmap[0]);
-                                mBuilder.setContentIntent(pendingIntent);
-                                NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                                manager.notify(notificationId, mBuilder.build());
-                            } else if (msg_type.equalsIgnoreCase("image")) {
-                                Glide.with(getApplicationContext())
-                                        .asBitmap()
-                                        .load(msg_body)
-                                        .into(new CustomTarget<Bitmap>() {
-                                            @Override
-                                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                                NotificationCompat.Builder mBuilder = getAndroidChannelImageNotification(title, resource, from, bitmap[0]);
-                                                mBuilder.setContentIntent(pendingIntent);
-                                                NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                                                manager.notify(notificationId, mBuilder.build());
-                                            }
-
-                                            @Override
-                                            public void onLoadCleared(@Nullable Drawable placeholder) {
-
-                                            }
-                                        });
-                            } else if (msg_type.equalsIgnoreCase("audio")) {
-                                NotificationCompat.Builder mBuilder = getAndroidChannelTextNotification(title, "You received an audio file", from, bitmap[0]);
-                                mBuilder.setContentIntent(pendingIntent);
-                                NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                                manager.notify(notificationId, mBuilder.build());
-                            } else if (msg_type.equalsIgnoreCase("video")) {
-                                NotificationCompat.Builder mBuilder = getAndroidChannelTextNotification(title, "You received a video file", from, bitmap[0]);
-                                mBuilder.setContentIntent(pendingIntent);
-                                NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                                manager.notify(notificationId, mBuilder.build());
-                            } else {
-                                NotificationCompat.Builder mBuilder = getAndroidChannelTextNotification(title, "You received a document file", from, bitmap[0]);
-                                mBuilder.setContentIntent(pendingIntent);
-                                NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                                manager.notify(notificationId, mBuilder.build());
+                                                }
+                                            });
+                                } else if (msg_type.equalsIgnoreCase("audio")) {
+                                    NotificationCompat.Builder mBuilder = getAndroidChannelTextNotification(title, "You received an audio file", from, bitmap[0]);
+                                    mBuilder.setContentIntent(pendingIntent);
+                                    NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                                    manager.notify(notificationId, mBuilder.build());
+                                } else if (msg_type.equalsIgnoreCase("video")) {
+                                    NotificationCompat.Builder mBuilder = getAndroidChannelTextNotification(title, "You received a video file", from, bitmap[0]);
+                                    mBuilder.setContentIntent(pendingIntent);
+                                    NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                                    manager.notify(notificationId, mBuilder.build());
+                                } else {
+                                    NotificationCompat.Builder mBuilder = getAndroidChannelTextNotification(title, "You received a document file", from, bitmap[0]);
+                                    mBuilder.setContentIntent(pendingIntent);
+                                    NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                                    manager.notify(notificationId, mBuilder.build());
+                                }
                             }
                         }
-                    }
 
-                    @Override
-                    public void onLoadCleared(@Nullable Drawable placeholder) {
-                    }
-                });
-
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+                        }
+                    });
+        }
     }
 
     public NotificationCompat.Builder getAndroidChannelImageNotification(String title, Bitmap body, String id, Bitmap bitmap) {

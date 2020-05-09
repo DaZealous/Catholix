@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@drawable/chat_back_img"
     tools:context=".ChatActivity">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -29,7 +28,7 @@
                 android:layout_centerVertical="true" />
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:layout_marginStart="20dp"
+                android:layout_marginStart="10dp"
                 android:layout_centerVertical="true"
                 android:layout_toEndOf="@+id/activity_chat_back_btn"
                 android:id="@+id/activity_chat_user_img"
@@ -43,19 +42,19 @@
             android:layout_marginTop="10dp"
             android:layout_toEndOf="@+id/activity_chat_user_img"
             android:orientation="vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="15dp">
+            android:layout_toStartOf="@id/activity_chat_progress_file_upload"
+            android:layout_marginStart="10dp">
             <TextView
                 android:transitionName="username"
                 android:textStyle="bold"
-                android:textSize="17sp"
+                android:textSize="15sp"
                 android:textColor="@color/white"
                 android:id="@+id/activity_chat_text_username"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="18dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp"
                 android:text="Username"
                 tools:targetApi="lollipop" />
 
@@ -63,27 +62,46 @@
                 android:alpha="0.7"
                 android:layout_marginEnd="10dp"
                 android:fontFamily="@font/rokkitt_regular"
-                android:textSize="15sp"
+                android:textSize="13sp"
                 android:textColor="@color/white"
                 android:id="@+id/activity_chat_text_time"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="16dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp"
-                android:text="" />
+                android:text="active 19 mintess ago" />
         </LinearLayout>
             <ProgressBar
                 android:visibility="invisible"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_alignParentEnd="true"
+                android:layout_toStartOf="@id/activity_chat_menu_options"
                 android:layout_centerVertical="true"
-                android:layout_marginEnd="15dp"
+                android:layout_marginStart="10dp"
                 android:theme="@style/BarTheme"
                 android:id="@+id/activity_chat_progress_file_upload"/>
+
+            <ImageButton
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_more_vert_white_24dp"
+                android:visibility="visible"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:theme="@style/BarTheme"
+                android:id="@+id/activity_chat_menu_options"/>
         </RelativeLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
+
+    <ImageView
+        android:layout_below="@+id/chatsToolbarLayout"
+        android:id="@+id/activity_chat_img_back"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:layout_below="@+id/chatsToolbarLayout"

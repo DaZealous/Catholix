@@ -2,32 +2,42 @@ package www.catholix.com.ng;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.app.Dialog;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,30 +65,34 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import adapter.ChatAdapter;
+import adapter.MyAdapter;
+import config.ChatDatabase;
 import config.FileConfig;
 import config.GetTimeAgo;
 import config.KeyboardUtils;
 import config.SharedPref;
 import de.hdodenhof.circleimageview.CircleImageView;
 import model.ChatDao;
+import model.ContactModel;
 import view.ChatsView;
 
 public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, ChatsView {
 
     RecyclerView recyclerView;
-    ImageButton btnSend, imgPickImage, imgAttach, backBtn, audioPick, btnCameraPick, btnVideoPick, btnDocumentPick, btnContactPick;
+    ImageButton btnSend, imgPickImage, imgAttach, backBtn, audioPick, btnCameraPick, btnVideoPick, btnDocumentPick, btnContactPick, popUpMenuBtn;
     EditText editText;
     ChatAdapter adapter;
     List<ChatDao> list;
     String userID, otherUser, username, otherUsername, imgUrl;
     SwipeRefreshLayout swipeRefreshLayout;
-    ImageView imageView;
+    ImageView imageView, chatBackImg;
     static final int DC_RESULT = 1, AUDIO_RESULT = 2, VIDEO_RESULT = 3, DOC_RESULT = 4, CONTACT_RESULT = 5;
     DatabaseReference rootRef;
     static final int TOTAL_ITEMS_TO_LOAD = 15;
@@ -113,6 +127,7 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
             otherUser = getIntent().getStringExtra("userID");
             otherUsername = getIntent().getStringExtra("username");
             imgUrl = getIntent().getStringExtra("img_url");
+
             recyclerView = findViewById(R.id.activity_chat_recycler_view);
             btnSend = findViewById(R.id.activity_chat_btn_send);
             imgPickImage = findViewById(R.id.activity_chat_image_file_pick);
@@ -130,6 +145,14 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
             btnVideoPick = findViewById(R.id.activity_chat_video_file_pick);
             btnDocumentPick = findViewById(R.id.activity_chat_document_file_pick);
             btnContactPick = findViewById(R.id.activity_chat_contact_file_pick);
+            chatBackImg = findViewById(R.id.activity_chat_img_back);
+            popUpMenuBtn = findViewById(R.id.activity_chat_menu_options);
+
+            if (new ChatDatabase(this).findChatImage("1") == null)
+                chatBackImg.setImageResource(R.drawable.chat_back_img);
+            else
+                chatBackImg.setImageBitmap(BitmapFactory.decodeByteArray(new ChatDatabase(this).findChatImage("1"),
+                        0, new ChatDatabase(this).findChatImage("1").length));
 
             rootFile = Environment.getExternalStorageDirectory();
 
@@ -378,12 +401,100 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
             });
 
             btnContactPick.setOnClickListener(view -> {
+                chooseFileLayout.setVisibility(View.GONE);
+                final List<ContactModel> contactsList = getContacts();
+                final Dialog dialog = new Dialog(this);
+                dialog.setContentView(R.layout.contacts_list_view);
+                dialog.setCancelable(true);
+                dialog.setCanceledOnTouchOutside(true);
+                dialog.setTitle("Select Contact");
+                ListView listView = dialog.findViewById(R.id.contacts_list_view);
+                MyAdapter adapter = new MyAdapter(this, contactsList);
+                listView.setAdapter(adapter);
+                listView.setOnItemClickListener((adapterView, view1, i, l) -> {
+                    ContactModel model = contactsList.get(i);
+                    dialog.dismiss();
+                    sendContact(model);
+                });
+                dialog.show();
+            });
 
+            popUpMenuBtn.setOnClickListener(view -> {
+                PopupMenu pop = new PopupMenu(this, popUpMenuBtn);
+                pop.inflate(R.menu.chat_activity_menu);
+//                pop.setOnMenuItemClickListener(item ->
+//                    );
+                pop.show();
             });
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    private void sendContact(ContactModel model) {
+        String current_user_ref = "messages/" + userID + "/" + otherUser;
+        String chat_user_ref = "messages/" + otherUser + "/" + userID;
+
+        DatabaseReference user_message_push = rootRef.child("messages")
+                .child(userID).child(otherUser).push();
+
+        final String push_id = user_message_push.getKey();
+
+        Map messageMap = new HashMap();
+        messageMap.put("msg_body", model.mobileNumber);
+        messageMap.put("key", push_id);
+        messageMap.put("seen", false);
+        messageMap.put("isRead", false);
+        messageMap.put("msg_type", "contact");
+        messageMap.put("time_stamp", ServerValue.TIMESTAMP);
+        messageMap.put("from", userID);
+        messageMap.put("to", otherUser);
+        messageMap.put("msg_name", model.name);
+        messageMap.put("fromUsername", username);
+        messageMap.put("toUsername", otherUsername);
+
+        Map messageUserMap = new HashMap();
+        messageUserMap.put(current_user_ref + "/" + push_id, messageMap);
+        messageUserMap.put(chat_user_ref + "/" + push_id, messageMap);
+
+        editText.setText("");
+
+        rootRef.child("Chat").child(userID).child(otherUser).child("seen").setValue(true);
+
+        rootRef.child("Chat").child(userID).child(otherUser).child("time_stamp").setValue(ServerValue.TIMESTAMP);
+
+        rootRef.child("Chat").child(otherUser).child(userID).child("seen").setValue(false);
+        rootRef.child("Chat").child(otherUser).child(userID).child("time_stamp").setValue(ServerValue.TIMESTAMP);
+
+
+        rootRef.updateChildren(messageUserMap, (databaseError, databaseReference) -> {
+
+            if (databaseError == null) {
+
+                rootRef.child("messages").child(userID).child(otherUser).child(push_id).child("seen").setValue(true);
+                rootRef.child("messages").child(userID).child(otherUser).child(push_id).child("isRead").setValue(true);
+
+            }
+
+        });
+
+    }
+
+    public List<ContactModel> getContacts() {
+            List<ContactModel> list = new ArrayList<>();
+        Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,null,null, null);
+        while (phones.moveToNext())
+        {
+            String name= phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+            String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+            ContactModel model = new ContactModel();
+            model.mobileNumber = phoneNumber;
+            model.name = name;
+            list.add(model);
+        }
+        phones.close();
+            return list;
+        }
 
     private void sendAudio(Uri uri) {
         bar.setVisibility(View.VISIBLE);
@@ -698,7 +809,6 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
                 dir = docUri.getPath();
                 File file = new File(getFilePath(docUri, new String[]{MediaStore.Files.FileColumns.DATA}));
                 fileName = file.getName();
-                Toast.makeText(this, fileName, Toast.LENGTH_SHORT).show();
                 if (getFileSize(docUri, new String[]{OpenableColumns.SIZE}) > 5)
                     Toast.makeText(this, "you cannot send a file greater than 5mb", Toast.LENGTH_SHORT).show();
                 else {
@@ -708,11 +818,70 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    //sendVideo(docUri);
+                    sendFile(docUri);
                 }
             }
         }
 
+    }
+
+    private void sendFile(Uri uri) {
+        bar.setVisibility(View.VISIBLE);
+        Toast.makeText(this, "sending file...", Toast.LENGTH_SHORT).show();
+        final String current_user_ref = "messages/" + userID + "/" + otherUser;
+        final String chat_user_ref = "messages/" + otherUser + "/" + userID;
+
+        DatabaseReference user_message_push = rootRef.child("messages")
+                .child(userID).child(otherUser).push();
+
+        final String push_id = user_message_push.getKey();
+        final StorageReference thumbRef = mImageStorage.child("message_files").child(fileName);
+        UploadTask uploadTask = thumbRef.putFile(uri);
+
+        uploadTask.addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                thumbRef.getDownloadUrl().addOnSuccessListener(uri1 -> {
+                    String thumb_url = uri1.toString();
+                    Map messageMap = new HashMap();
+                    messageMap.put("msg_body", thumb_url);
+                    messageMap.put("key", push_id);
+                    messageMap.put("seen", false);
+                    messageMap.put("msg_type", "file");
+                    messageMap.put("time_stamp", ServerValue.TIMESTAMP);
+                    messageMap.put("from", userID);
+                    messageMap.put("to", otherUser);
+                    messageMap.put("msg_name", fileName);
+                    messageMap.put("fromUsername", username);
+                    messageMap.put("toUsername", otherUsername);
+
+
+                    Map messageUserMap = new HashMap();
+                    messageUserMap.put(current_user_ref + "/" + push_id, messageMap);
+                    messageUserMap.put(chat_user_ref + "/" + push_id, messageMap);
+
+                    editText.setText("");
+
+                    rootRef.child("Chat").child(userID).child(otherUser).child("seen").setValue(true);
+
+                    rootRef.child("Chat").child(userID).child(otherUser).child("time_stamp").setValue(ServerValue.TIMESTAMP);
+
+                    rootRef.child("Chat").child(otherUser).child(userID).child("seen").setValue(false);
+                    rootRef.child("Chat").child(otherUser).child(userID).child("time_stamp").setValue(ServerValue.TIMESTAMP);
+
+                    rootRef.updateChildren(messageUserMap, (databaseError, databaseReference) -> {
+
+                        if (databaseError == null) {
+                            bar.setVisibility(View.INVISIBLE);
+                            Toast.makeText(ChatActivity.this, "uploaded successfully", Toast.LENGTH_SHORT).show();
+                        }
+
+                    });
+                });
+            } else {
+                bar.setVisibility(View.INVISIBLE);
+                Toast.makeText(ChatActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void saveFile(File src, File dst) throws IOException {
@@ -904,3 +1073,4 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
 }
+

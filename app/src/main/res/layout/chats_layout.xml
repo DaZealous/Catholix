@@ -164,7 +164,7 @@
             android:layout_marginTop="5dp"
             android:layout_width="match_parent"
             android:layout_height="70dp"
-            app:cardBackgroundColor="@color/colorPrimary"
+            app:cardBackgroundColor="#36A4B8"
             app:cardCornerRadius="15dp">
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -216,7 +216,7 @@
             android:layout_marginTop="5dp"
             android:layout_width="match_parent"
             android:layout_height="70dp"
-            app:cardBackgroundColor="@color/colorPrimary"
+            app:cardBackgroundColor="#36A4B8"
             app:cardCornerRadius="15dp">
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -280,7 +280,7 @@
     </LinearLayout>
 
     <RelativeLayout
-        android:visibility="gone"
+        android:visibility="visible"
         android:layout_below="@+id/chat_layout_admin_layout"
         android:id="@+id/chat_layout_user_layout"
         android:layout_marginTop="10dp"

@@ -18,6 +18,7 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -90,6 +91,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
             holder.imgChatAdminTime.setText(DateUtils.getRelativeTimeSpanString(dao.getTime_stamp()));
             holder.userAudioTime.setText(DateUtils.getRelativeTimeSpanString(dao.getTime_stamp()));
             holder.adminAudioTime.setText(DateUtils.getRelativeTimeSpanString(dao.getTime_stamp()));
+            holder.textAdminFileTime.setText(DateUtils.getRelativeTimeSpanString(dao.getTime_stamp()));
+            holder.textUserFileTime.setText(DateUtils.getRelativeTimeSpanString(dao.getTime_stamp()));
+            holder.textAdminContactTime.setText(DateUtils.getRelativeTimeSpanString(dao.getTime_stamp()));
+            holder.textUserContactTime.setText(DateUtils.getRelativeTimeSpanString(dao.getTime_stamp()));
+
             mediaPlayer = null;
             isPlaying = false;
             handler = new Handler();
@@ -325,6 +331,19 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
                     holder.downloadVideo(dao.getMsg_name(), dao.getMsg_body());
                 }
             });
+
+            holder.userContactBtnView.setOnClickListener(view1 -> {
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:" + dao.getMsg_body()));
+                context.startActivity(intent);
+            });
+
+            holder.adminContactBtnView.setOnClickListener(view1 -> {
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:" + dao.getMsg_body()));
+                context.startActivity(intent);
+            });
+
         } catch (Exception e) {
             Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
@@ -340,12 +359,14 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
 
         LinearLayout adminLinear;
         RelativeLayout userLinear, imgLayout1, imgLayout2;
-        CardView imgUser, imgAdmin, textAdminCard, textUserCard, cardAdminAudio, cardUserAudio;
-        TextView textUser, textAdmin, adminTime, userTime, imgChatUserTime, imgChatAdminTime, adminAudioTime, userAudioTime;
-        ImageView chatAdminImg, chatUserImg;
+        CardView imgUser, imgAdmin, textAdminCard, textUserCard, cardAdminAudio, cardUserAudio, cardUserFile, cardAdminFile, cardUserContact, cardAdminContact;
+        TextView textUser, textAdmin, adminTime, userTime, imgChatUserTime, imgChatAdminTime, adminAudioTime, userAudioTime,
+        textUserFile, textUserFileTime, textAdminFile, textAdminFileTime, textUserContact, textUserContactTime, textAdminContact, textAdminContactTime;
+        ImageView chatAdminImg, chatUserImg, userFileImage, adminFileImage;
         ImageButton adminAudioPlayBtn, userAudioPlayBtn, adminPlayVideoBtn, userPlayVideoBtn;
         SeekBar adminAudioSeekBar, userAudioSeekBar;
         ProgressBar adminVideoBar, userVideoBar;
+        Button userContactBtnView, adminContactBtnView;
 
         private viewHolder(@NonNull View itemView) {
             super(itemView);
@@ -377,6 +398,24 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
             userVideoBar = itemView.findViewById(R.id.chat_video_user_progress_bar);
             adminPlayVideoBtn = itemView.findViewById(R.id.chat_video_admin_download_play_btn);
             userPlayVideoBtn = itemView.findViewById(R.id.chat_video_user_download_play_btn);
+            cardUserFile = itemView.findViewById(R.id.chat_user_card_file);
+            cardAdminFile = itemView.findViewById(R.id.chat_admin_card_file);
+            cardUserContact = itemView.findViewById(R.id.chat_user_card_contact);
+            cardAdminContact = itemView.findViewById(R.id.chat_admin_card_contact);
+            textUserFile = itemView.findViewById(R.id.chat_user_file_text_name);
+            textUserFileTime = itemView.findViewById(R.id.chat_user_file_text_time);
+            userFileImage = itemView.findViewById(R.id.chat_user_file_img);
+            textAdminFile = itemView.findViewById(R.id.chat_admin_file_text_name);
+            textAdminFileTime = itemView.findViewById(R.id.chat_admin_file_text_time);
+            adminFileImage = itemView.findViewById(R.id.chat_admin_file_img);
+            textUserContact = itemView.findViewById(R.id.chat_user_contact_text_name);
+            textAdminContact = itemView.findViewById(R.id.chat_admin_contact_text_name);
+            textUserContactTime = itemView.findViewById(R.id.chat_user_contact_text_time);
+            textAdminContactTime = itemView.findViewById(R.id.chat_admin_contact_text_time);
+            userContactBtnView = itemView.findViewById(R.id.chat_user_contact_view_btn);
+            adminContactBtnView = itemView.findViewById(R.id.chat_admin_contact_view_btn);
+
+
         }
 
         private void setTextUser(String text) {
@@ -414,6 +453,10 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
                 imgUser.setVisibility(View.GONE);
                 cardUserAudio.setVisibility(View.GONE);
                 cardAdminAudio.setVisibility(View.GONE);
+                cardAdminFile.setVisibility(View.GONE);
+                cardUserFile.setVisibility(View.GONE);
+                cardAdminContact.setVisibility(View.GONE);
+                cardUserContact.setVisibility(View.GONE);
             } else if (msg_type.equalsIgnoreCase("image")) {
                 Glide.with(context).load(img).into(chatAdminImg);
                 Glide.with(context).load(img).into(chatUserImg);
@@ -425,6 +468,10 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
                 cardAdminAudio.setVisibility(View.GONE);
                 userPlayVideoBtn.setVisibility(View.INVISIBLE);
                 adminPlayVideoBtn.setVisibility(View.INVISIBLE);
+                cardAdminFile.setVisibility(View.GONE);
+                cardUserFile.setVisibility(View.GONE);
+                cardAdminContact.setVisibility(View.GONE);
+                cardUserContact.setVisibility(View.GONE);
             } else if (msg_type.equalsIgnoreCase("video")) {
                 imgAdmin.setVisibility(View.VISIBLE);
                 imgUser.setVisibility(View.VISIBLE);
@@ -432,6 +479,10 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
                 textUserCard.setVisibility(View.GONE);
                 cardUserAudio.setVisibility(View.GONE);
                 cardAdminAudio.setVisibility(View.GONE);
+                cardAdminFile.setVisibility(View.GONE);
+                cardUserFile.setVisibility(View.GONE);
+                cardAdminContact.setVisibility(View.GONE);
+                cardUserContact.setVisibility(View.GONE);
 
                 userPlayVideoBtn.setVisibility(View.VISIBLE);
                 adminPlayVideoBtn.setVisibility(View.VISIBLE);
@@ -449,6 +500,45 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
                     adminPlayVideoBtn.setImageResource(R.drawable.ic_file_download_white_24dp);
                 }
 
+            } else if (msg_type.equalsIgnoreCase("file")) {
+                imgAdmin.setVisibility(View.GONE);
+                imgUser.setVisibility(View.GONE);
+                textAdminCard.setVisibility(View.GONE);
+                textUserCard.setVisibility(View.GONE);
+                cardUserAudio.setVisibility(View.GONE);
+                cardAdminAudio.setVisibility(View.GONE);
+                cardAdminFile.setVisibility(View.VISIBLE);
+                cardUserFile.setVisibility(View.VISIBLE);
+                cardAdminContact.setVisibility(View.GONE);
+                cardUserContact.setVisibility(View.GONE);
+
+                textUserFile.setText(msg_name);
+                textAdminFile.setText(msg_name);
+
+                File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Catholix/" + msg_name);
+
+                if (file.exists()) {
+                    Glide.with(context).load(file.getAbsolutePath()).placeholder(R.drawable.ic_insert_drive_file_white_24dp).into(userFileImage);
+                    Glide.with(context).load(file.getAbsolutePath()).placeholder(R.drawable.ic_insert_drive_file_white_24dp).into(adminFileImage);
+                } else {
+                    Glide.with(context).load(img).placeholder(R.drawable.ic_insert_drive_file_white_24dp).into(userFileImage);
+                    Glide.with(context).load(img).placeholder(R.drawable.ic_insert_drive_file_white_24dp).into(adminFileImage);
+                }
+            } else if (msg_type.equalsIgnoreCase("contact")) {
+                imgAdmin.setVisibility(View.GONE);
+                imgUser.setVisibility(View.GONE);
+                textAdminCard.setVisibility(View.GONE);
+                textUserCard.setVisibility(View.GONE);
+                cardUserAudio.setVisibility(View.GONE);
+                cardAdminAudio.setVisibility(View.GONE);
+                cardAdminFile.setVisibility(View.GONE);
+                cardUserFile.setVisibility(View.GONE);
+                cardAdminContact.setVisibility(View.VISIBLE);
+                cardUserContact.setVisibility(View.VISIBLE);
+
+                textUserContact.setText(msg_name);
+                textAdminContact.setText(msg_name);
+
             } else {
                 textAdminCard.setVisibility(View.GONE);
                 textUserCard.setVisibility(View.GONE);
@@ -456,7 +546,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
                 imgUser.setVisibility(View.GONE);
                 cardUserAudio.setVisibility(View.VISIBLE);
                 cardAdminAudio.setVisibility(View.VISIBLE);
-                //context.getFileStreamPath(msg_name);
+                cardAdminFile.setVisibility(View.GONE);
+                cardUserFile.setVisibility(View.GONE);
+                cardAdminContact.setVisibility(View.GONE);
+                cardUserContact.setVisibility(View.GONE);
+
                 File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Catholix/" + msg_name);
                 if (file.exists()) {
                     userAudioPlayBtn.setImageResource(R.drawable.ic_play_arrow_white_24dp);

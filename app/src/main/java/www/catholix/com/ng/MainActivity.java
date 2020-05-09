@@ -181,14 +181,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_menu_profile:
                 return false;
             case R.id.nav_menu_settings:
-                return false;
-            case R.id.nav_menu_logout:
+                getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_navigation, new Settings()).commit();
                 layout.closeDrawer(GravityCompat.START);
-                FirebaseDatabase.getInstance().getReference().child("Users").child(SharedPref.getInstance(this).getId()).child("online").setValue(System.currentTimeMillis());
-                FirebaseDatabase.getInstance().getReference().child("Users").child(SharedPref.getInstance(this).getId()).child("device_token").setValue("");
-                SharedPref.getInstance(this).removeUser();
-                startActivity(new Intent(this, WelcomeActivity.class));
-                finish();
                 return true;
             case R.id.nav_menu_users:
                 startActivity(new Intent(this, UsersActivity.class));

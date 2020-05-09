@@ -87,18 +87,17 @@ public class ChatHistoryAdapter extends RecyclerView.Adapter<ChatHistoryAdapter.
                     }
                     else if(message.getMsg_type().equalsIgnoreCase("audio")) {
                         holder.imgMsgType.setImageResource(R.drawable.ic_keyboard_voice_drey_24dp);
-                        holder.imgMsgType.setVisibility(View.VISIBLE);
-                        holder.textMessage.setText("audio");
+                        holder.imgMsgType.setVisibility(View.VISIBLE);holder.textMessage.setText("audio");
                     }
                     else if(message.getMsg_type().equalsIgnoreCase("video")) {
                         holder.imgMsgType.setImageResource(R.drawable.ic_videocam_grey_24dp);
                         holder.imgMsgType.setVisibility(View.VISIBLE);
                         holder.textMessage.setText("video");
                     }
-                    else if(message.getMsg_type().equalsIgnoreCase("document")){
+                    else if(message.getMsg_type().equalsIgnoreCase("file")){
                         holder.imgMsgType.setImageResource(R.drawable.ic_insert_drive_file_grey_24dp);
                         holder.imgMsgType.setVisibility(View.VISIBLE);
-                        holder.textMessage.setText("file");
+                        holder.textMessage.setText("document");
                     }else if(message.getMsg_type().equalsIgnoreCase("contact")){
                         holder.imgMsgType.setImageResource(R.drawable.ic_perm_contact_calendar_grey_24dp);
                         holder.imgMsgType.setVisibility(View.VISIBLE);
@@ -194,10 +193,10 @@ public class ChatHistoryAdapter extends RecyclerView.Adapter<ChatHistoryAdapter.
                             holder.imgMsgType.setVisibility(View.VISIBLE);
                             holder.textMessage.setText("video");
                         }
-                        else if(message.getMsg_type().equalsIgnoreCase("document")){
+                        else if(message.getMsg_type().equalsIgnoreCase("file")){
                             holder.imgMsgType.setImageResource(R.drawable.ic_insert_drive_file_grey_24dp);
                             holder.imgMsgType.setVisibility(View.VISIBLE);
-                            holder.textMessage.setText("file");
+                            holder.textMessage.setText("document");
                         }else if(message.getMsg_type().equalsIgnoreCase("contact")){
                             holder.imgMsgType.setImageResource(R.drawable.ic_perm_contact_calendar_grey_24dp);
                             holder.imgMsgType.setVisibility(View.VISIBLE);

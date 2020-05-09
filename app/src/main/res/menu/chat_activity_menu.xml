@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:title="Delete Chat"
+        android:id="@+id/chat_activity_delete_chat"
+        app:showAsAction="never"/>
+
+    <item
+        android:title="Clear Conversation"
+        android:id="@+id/chat_activity_clear_conversation"
+        app:showAsAction="never"/>
+
+    <item
+        android:title="Block User"
+        android:id="@+id/chat_activity_block_user"
+        android:icon="@drawable/ic_search_black_24dp"
+        app:showAsAction="ifRoom"
+        app:actionProviderClass="androidx.appcompat.widget.ShareActionProvider"
+        app:actionViewClass="android.widget.SearchView" />
+
+</menu>

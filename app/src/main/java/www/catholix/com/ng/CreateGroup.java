@@ -1,12 +1,10 @@
 package www.catholix.com.ng;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -22,22 +20,14 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageView;
-
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -58,7 +48,6 @@ import view.SelectUserView;
 
 public class CreateGroup extends AppCompatActivity implements SelectUserView {
 
-    private static final int GALLERY_PICK = 1;
     List<Users> list;
     UserService service;
     SelectUserAdapter adapter;
@@ -121,12 +110,11 @@ public class CreateGroup extends AppCompatActivity implements SelectUserView {
             }
         });
 
-        circleImageView.setOnClickListener(view -> {
+        circleImageView.setOnClickListener(view ->
             CropImage.activity(resultUri)
                     .setAspectRatio(1, 1)
                     .setMinCropWindowSize(500, 500)
-                    .start(this);
-        });
+                    .start(this));
         loadUsers();
     }
 

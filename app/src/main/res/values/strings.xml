@@ -113,4 +113,8 @@
     <string name="camera">Camera</string>
     <string name="search">Search</string>
     <string name="create_group">Create Group</string>
+    <string name="change_chat_background">Change Chat Background</string>
+    <string name="logout">Log out</string>
+    <string name="mute_notifications">Mute Notifications</string>
+    <string name="un_mute_notifications">Un Mute Notifications</string>
 </resources>

@@ -1,15 +1,19 @@
 package www.catholix.com.ng;
 
-import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -20,6 +24,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -53,29 +58,33 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import adapter.GroupChatAdapter;
+import adapter.MyAdapter;
+import config.ChatDatabase;
 import config.KeyboardUtils;
 import config.SharedPref;
 import de.hdodenhof.circleimageview.CircleImageView;
 import model.ChatDao;
+import model.ContactModel;
 import view.ChatsView;
 
 public class GroupChatActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, ChatsView {
 
     RecyclerView recyclerView;
-    ImageButton btnSend, imgPickImage, imgAttach, backBtn, audioPick, btnCameraPick;
+    ImageButton btnSend, imgPickImage, imgAttach, backBtn, audioPick, btnCameraPick, btnVideoPick, btnDocumentPick, btnContactPick;
     EditText editText;
     GroupChatAdapter adapter;
     List<ChatDao> list;
     String userID, otherUser, username, otherUsername, imgUrl, youAndOthers, admin;
     SwipeRefreshLayout swipeRefreshLayout;
-    ImageView imageView;
-    static int DC_RESULT = 1, AUDIO_RESULT = 2;
+    ImageView imageView, chatBackImg;
+    static int DC_RESULT = 1, AUDIO_RESULT = 2, VIDEO_RESULT = 3, DOC_RESULT = 4;
     DatabaseReference rootRef;
     static final int TOTAL_ITEMS_TO_LOAD = 15;
     int mCurrentPage = 1;
@@ -125,6 +134,19 @@ public class GroupChatActivity extends AppCompatActivity implements SwipeRefresh
         relativeLayout = findViewById(R.id.activity_group_chat_relative_layout);
         textUserAdded = findViewById(R.id.activity_group_chat_text_user_added);
         btnCameraPick = findViewById(R.id.activity_chat_image_camera_pick);
+        btnVideoPick = findViewById(R.id.activity_chat_video_file_pick);
+        btnDocumentPick = findViewById(R.id.activity_chat_document_file_pick);
+        btnContactPick = findViewById(R.id.activity_chat_contact_file_pick);
+        chatBackImg = findViewById(R.id.activity_chat_img_back);
+
+        if (new ChatDatabase(this).findChatImage("1") == null)
+            chatBackImg.setImageResource(R.drawable.chat_back_img);
+        else
+            chatBackImg.setImageBitmap(BitmapFactory.decodeByteArray(new ChatDatabase(this).findChatImage("1"),
+                    0, new ChatDatabase(this).findChatImage("1").length));
+
+        rootFile = Environment.getExternalStorageDirectory();
+
         Glide.with(this).load(imgUrl).placeholder(otherUser.matches("\\d+")?R.drawable.ic_person_profile_24dp:R.drawable.ic_people_outline_grey_24dp).into(userImage);
         textUsername.setText(otherUsername);
         textTimeStamp.setText("");
@@ -324,6 +346,13 @@ public class GroupChatActivity extends AppCompatActivity implements SwipeRefresh
             }
         });
 
+        audioPick.setOnClickListener(view -> {
+            chooseFileLayout.setVisibility(View.GONE);
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("audio/*");
+            startActivityForResult(intent, AUDIO_RESULT);
+        });
+
         backBtn.setOnClickListener(view -> onBackPressed());
 
         imgPickImage.setOnClickListener(view -> {
@@ -338,6 +367,40 @@ public class GroupChatActivity extends AppCompatActivity implements SwipeRefresh
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             startActivityForResult(intent, DC_RESULT);
         });
+
+        btnVideoPick.setOnClickListener(view -> {
+            chooseFileLayout.setVisibility(View.GONE);
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("video/*");
+            startActivityForResult(intent, VIDEO_RESULT);
+        });
+
+        btnDocumentPick.setOnClickListener(view -> {
+            chooseFileLayout.setVisibility(View.GONE);
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("*/*");
+            startActivityForResult(intent, DOC_RESULT);
+        });
+
+        btnContactPick.setOnClickListener(view -> {
+            chooseFileLayout.setVisibility(View.GONE);
+            final List<ContactModel> contactsList = getContacts();
+            final Dialog dialog = new Dialog(this);
+            dialog.setContentView(R.layout.contacts_list_view);
+            dialog.setCancelable(true);
+            dialog.setCanceledOnTouchOutside(true);
+            dialog.setTitle("Select Contact");
+            ListView listView = dialog.findViewById(R.id.contacts_list_view);
+            MyAdapter adapter = new MyAdapter(this, contactsList);
+            listView.setAdapter(adapter);
+            listView.setOnItemClickListener((adapterView, view1, i, l) -> {
+                ContactModel model = contactsList.get(i);
+                sendContact(model);
+                dialog.dismiss();
+            });
+            dialog.show();
+        });
+
     }
 
     private void sendAudio(Uri uri) {
@@ -405,7 +468,6 @@ public class GroupChatActivity extends AppCompatActivity implements SwipeRefresh
         btnSend.setImageResource(R.drawable.ic_pause_white_24dp);
         Toast.makeText(this, "recording started", Toast.LENGTH_SHORT).show();
         try {
-            rootFile = Environment.getExternalStorageDirectory();
             String time = Long.toString(System.currentTimeMillis());
             dir = rootFile.getAbsolutePath() + "/Catholix/" + time + ".3gp";
             fileName = time + ".3gp";
@@ -563,7 +625,253 @@ public class GroupChatActivity extends AppCompatActivity implements SwipeRefresh
                 Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
+        else if(requestCode == VIDEO_RESULT && resultCode == RESULT_OK){
+            Uri videoUri = data.getData();
+            if (videoUri != null) {
+                dir = videoUri.getPath();
+                File file = new File(getFilePath(videoUri, new String[]{MediaStore.Video.Media.DATA}));
+                fileName = file.getName();
+                if (getFileSize(videoUri, new String[]{OpenableColumns.SIZE}) > 5)
+                    Toast.makeText(this, "you cannot send video file greater than 5mb", Toast.LENGTH_SHORT).show();
+                else {
+                    String dirDest = rootFile.getAbsolutePath() + "/Catholix/";
+                    try {
+                        saveFile(file, new File(dirDest));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    sendVideo(videoUri);
+                }
+            }
+        }else if(requestCode == DOC_RESULT && resultCode == RESULT_OK){
+            Uri docUri = data.getData();
+            if (docUri != null) {
+                dir = docUri.getPath();
+                File file = new File(getFilePath(docUri, new String[]{MediaStore.Files.FileColumns.DATA}));
+                fileName = file.getName();
+                if (getFileSize(docUri, new String[]{OpenableColumns.SIZE}) > 5)
+                    Toast.makeText(this, "you cannot send a file greater than 5mb", Toast.LENGTH_SHORT).show();
+                else {
+                    String dirDest = rootFile.getAbsolutePath() + "/Catholix/";
+                    try {
+                        saveFile(file, new File(dirDest));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    sendFile(docUri);
+                }
+            }
+        }
 
+    }
+
+    public List<ContactModel> getContacts() {
+        List<ContactModel> list = new ArrayList<>();
+        Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,null,null, null);
+        while (phones.moveToNext())
+        {
+            String name= phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+            String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+            ContactModel model = new ContactModel();
+            model.mobileNumber = phoneNumber;
+            model.name = name;
+            list.add(model);
+        }
+        phones.close();
+        return list;
+    }
+
+    private void sendContact(ContactModel model) {
+
+        String current_user_ref = "messages/" + userID + "/" + otherUser;
+        String chat_user_ref = "messages/" + otherUser;
+
+        DatabaseReference user_message_push = rootRef.child("messages")
+                .child(userID).child(otherUser).push();
+
+        final String push_id = user_message_push.getKey();
+
+        Map messageMap = new HashMap();
+        messageMap.put("msg_body", model.mobileNumber);
+        messageMap.put("key", push_id);
+        messageMap.put("seen", false);
+        messageMap.put("isRead", false);
+        messageMap.put("msg_type", "contact");
+        messageMap.put("time_stamp", ServerValue.TIMESTAMP);
+        messageMap.put("from", userID);
+        messageMap.put("to", otherUser);
+        messageMap.put("msg_name", model.name);
+        messageMap.put("fromUsername", username);
+        messageMap.put("toUsername", otherUsername);
+
+        Map messageUserMap = new HashMap();
+        messageUserMap.put(current_user_ref + "/" + push_id, messageMap);
+        messageUserMap.put(chat_user_ref + "/" + push_id, messageMap);
+
+        editText.setText("");
+
+        rootRef.child("Chat").child(userID).child(otherUser).child("seen").setValue(true);
+
+        rootRef.child("Chat").child(userID).child(otherUser).child("time_stamp").setValue(ServerValue.TIMESTAMP);
+
+        rootRef.child("Chat").child(otherUser).child(userID).child("seen").setValue(false);
+        rootRef.child("Chat").child(otherUser).child(userID).child("time_stamp").setValue(ServerValue.TIMESTAMP);
+
+
+        rootRef.updateChildren(messageUserMap, (databaseError, databaseReference) -> {
+
+            if (databaseError == null) {
+
+                rootRef.child("messages").child(userID).child(otherUser).child(push_id).child("seen").setValue(true);
+                rootRef.child("messages").child(userID).child(otherUser).child(push_id).child("isRead").setValue(true);
+
+            }
+
+        });
+
+    }
+
+    private void sendVideo(Uri uri) {
+        bar.setVisibility(View.VISIBLE);
+        Toast.makeText(this, "sending video...", Toast.LENGTH_SHORT).show();
+        final String current_user_ref = "messages/" + userID + "/" + otherUser;
+        final String chat_user_ref = "messages/" + otherUser;
+
+        DatabaseReference user_message_push = rootRef.child("messages")
+                .child(userID).child(otherUser).push();
+
+        final String push_id = user_message_push.getKey();
+        final StorageReference thumbRef = mImageStorage.child("message_video").child(fileName);
+        UploadTask uploadTask = thumbRef.putFile(uri);
+
+        uploadTask.addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                thumbRef.getDownloadUrl().addOnSuccessListener(uri1 -> {
+                    String thumb_url = uri1.toString();
+                    Map messageMap = new HashMap();
+                    messageMap.put("msg_body", thumb_url);
+                    messageMap.put("key", push_id);
+                    messageMap.put("seen", false);
+                    messageMap.put("msg_type", "video");
+                    messageMap.put("time_stamp", ServerValue.TIMESTAMP);
+                    messageMap.put("from", userID);
+                    messageMap.put("to", otherUser);
+                    messageMap.put("msg_name", fileName);
+                    messageMap.put("fromUsername", username);
+                    messageMap.put("toUsername", otherUsername);
+
+
+                    Map messageUserMap = new HashMap();
+                    messageUserMap.put(current_user_ref + "/" + push_id, messageMap);
+                    messageUserMap.put(chat_user_ref + "/" + push_id, messageMap);
+
+                    editText.setText("");
+
+                    rootRef.child("Chat").child(userID).child(otherUser).child("seen").setValue(true);
+
+                    rootRef.child("Chat").child(userID).child(otherUser).child("time_stamp").setValue(ServerValue.TIMESTAMP);
+
+                    rootRef.child("Chat").child(otherUser).child(userID).child("seen").setValue(false);
+                    rootRef.child("Chat").child(otherUser).child(userID).child("time_stamp").setValue(ServerValue.TIMESTAMP);
+
+                    rootRef.updateChildren(messageUserMap, (databaseError, databaseReference) -> {
+
+                        if (databaseError == null) {
+                            bar.setVisibility(View.INVISIBLE);
+                            Toast.makeText(GroupChatActivity.this, "uploaded successfully", Toast.LENGTH_SHORT).show();
+                        }
+
+                    });
+                });
+            } else {
+                bar.setVisibility(View.INVISIBLE);
+                Toast.makeText(GroupChatActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+
+    }
+
+    private void sendFile(Uri uri) {
+        bar.setVisibility(View.VISIBLE);
+        Toast.makeText(this, "sending file...", Toast.LENGTH_SHORT).show();
+        final String current_user_ref = "messages/" + userID + "/" + otherUser;
+        final String chat_user_ref = "messages/" + otherUser;
+
+        DatabaseReference user_message_push = rootRef.child("messages")
+                .child(userID).child(otherUser).push();
+
+        final String push_id = user_message_push.getKey();
+        final StorageReference thumbRef = mImageStorage.child("message_files").child(fileName);
+        UploadTask uploadTask = thumbRef.putFile(uri);
+
+        uploadTask.addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                thumbRef.getDownloadUrl().addOnSuccessListener(uri1 -> {
+                    String thumb_url = uri1.toString();
+                    Map messageMap = new HashMap();
+                    messageMap.put("msg_body", thumb_url);
+                    messageMap.put("key", push_id);
+                    messageMap.put("seen", false);
+                    messageMap.put("msg_type", "file");
+                    messageMap.put("time_stamp", ServerValue.TIMESTAMP);
+                    messageMap.put("from", userID);
+                    messageMap.put("to", otherUser);
+                    messageMap.put("msg_name", fileName);
+                    messageMap.put("fromUsername", username);
+                    messageMap.put("toUsername", otherUsername);
+
+
+                    Map messageUserMap = new HashMap();
+                    messageUserMap.put(current_user_ref + "/" + push_id, messageMap);
+                    messageUserMap.put(chat_user_ref + "/" + push_id, messageMap);
+
+                    editText.setText("");
+
+                    rootRef.child("Chat").child(userID).child(otherUser).child("seen").setValue(true);
+
+                    rootRef.child("Chat").child(userID).child(otherUser).child("time_stamp").setValue(ServerValue.TIMESTAMP);
+
+                    rootRef.child("Chat").child(otherUser).child(userID).child("seen").setValue(false);
+                    rootRef.child("Chat").child(otherUser).child(userID).child("time_stamp").setValue(ServerValue.TIMESTAMP);
+
+                    rootRef.updateChildren(messageUserMap, (databaseError, databaseReference) -> {
+
+                        if (databaseError == null) {
+                            bar.setVisibility(View.INVISIBLE);
+                            Toast.makeText(GroupChatActivity.this, "uploaded successfully", Toast.LENGTH_SHORT).show();
+                        }
+
+                    });
+                });
+            } else {
+                bar.setVisibility(View.INVISIBLE);
+                Toast.makeText(GroupChatActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void saveFile(File src, File dst) throws IOException {
+        org.apache.commons.io.FileUtils.copyFileToDirectory(src, dst);
+    }
+
+    private String getFilePath(Uri uri, String[] filePathColumn){
+        Cursor cursor = getContentResolver().query(uri, filePathColumn, null, null, null);
+        cursor.moveToFirst();
+        int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+        String picturePath = cursor.getString(columnIndex);
+        cursor.close();
+        return picturePath;
+    }
+
+    private long getFileSize(Uri uri, String[] filePathColumn){
+        Cursor cursor = getContentResolver().query(uri, filePathColumn, null, null, null);
+        cursor.moveToFirst();
+        int size = cursor.getColumnIndex(filePathColumn[0]);
+        long bytes = cursor.getLong(size);
+        cursor.close();
+        long kilo = bytes / 1024;
+        long mega = kilo / 1024;
+        return mega;
     }
 
     private void doUpload(byte[] thumb_byte) {

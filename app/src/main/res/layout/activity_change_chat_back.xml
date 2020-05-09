@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ChangeChatBack">
+
+    <ImageView
+        android:id="@+id/activity_change_chat_back_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
+
+    <Button
+        android:visibility="invisible"
+        android:id="@+id/activity_change_chat_back_btn_ok"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/round_circle_green"
+        android:text="OK"
+        android:fontFamily="@font/luckiestguy"
+        android:textColor="@color/white"
+        android:layout_centerHorizontal="true"
+        android:textSize="17sp"
+        android:paddingTop="5dp"
+        android:layout_above="@id/activity_change_chat_back_change_remove_container"/>
+
+    <LinearLayout
+        android:id="@+id/activity_change_chat_back_change_remove_container"
+        android:padding="15dp"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/activity_change_chat_back_remove"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Remove"
+            android:fontFamily="@font/rokkitt_regular"
+            android:textColor="@color/white"
+            android:textSize="17sp"
+            android:background="@drawable/btn_drawable"
+            android:drawableStart="@drawable/ic_delete_forever_white_24dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:gravity="center"/>
+
+        <Button
+            android:layout_marginStart="15dp"
+            android:id="@+id/activity_change_chat_back_change"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Change"
+            android:fontFamily="@font/rokkitt_regular"
+            android:textColor="@color/white"
+            android:textSize="17sp"
+            android:background="@drawable/cyan_back"
+            android:drawableStart="@drawable/ic_collections_white_24dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"/>
+
+    </LinearLayout>
+</RelativeLayout>

@@ -45,6 +45,7 @@ public class SplashActivity extends AppCompatActivity {
         String readPhoneState = Manifest.permission.READ_PHONE_STATE;
         String recordAudio = Manifest.permission.RECORD_AUDIO;
         String camera = Manifest.permission.CAMERA;
+        String contacts = Manifest.permission.READ_CONTACTS;
 
         List<String> permissionList = new ArrayList<>();
 
@@ -65,6 +66,9 @@ public class SplashActivity extends AppCompatActivity {
         }
         if (hasPermission(camera)) {
             permissionList.add(camera);
+        }
+        if (hasPermission(contacts)) {
+            permissionList.add(contacts);
         }
         if (!permissionList.isEmpty()) {
             String[] permissions = permissionList.toArray(new String[0]);

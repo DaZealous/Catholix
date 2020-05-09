@@ -43,6 +43,17 @@ public class SharedPref {
         editor.apply();
     }
 
+    public void muteNotify(boolean val){
+        SharedPreferences.Editor editor = getPref().edit();
+        editor.putBoolean("is_mute", val);
+        editor.apply();
+    }
+
+
+    public boolean getMuteNotify(){
+        return getPref().getBoolean("is_mute", false);
+    }
+
     public String getUser(){
         return getPref().getString("username", "");
     }
