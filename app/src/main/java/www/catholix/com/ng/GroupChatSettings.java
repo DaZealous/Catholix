@@ -2,12 +2,16 @@ package www.catholix.com.ng;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -21,13 +25,11 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,15 +40,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
-
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import Service.UserService;
 import adapter.MembersListAdapter;
 import api.RetrofitClient;
@@ -59,7 +55,6 @@ import view.GroupChatSettingsView;
 
 public class GroupChatSettings extends AppCompatActivity implements GroupChatSettingsView {
 
-    private static final int GALLERY_PICK = 1;
     Toolbar toolbar;
     String img_url, username, chat_id, admin;
     ImageView profileImgView;
@@ -74,6 +69,8 @@ public class GroupChatSettings extends AppCompatActivity implements GroupChatSet
     List<String> userIDs;
     ProgressBar membersBar;
     UserService service;
+    CardView layoutAddUser, layoutLeave, layoutClearChats;
+    ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +88,11 @@ public class GroupChatSettings extends AppCompatActivity implements GroupChatSet
         bar = findViewById(R.id.activity_group_settings_progress_bar_img);
         membersBar = findViewById(R.id.activity_group_settings_users_list_bar);
         recyclerView = findViewById(R.id.activity_group_settings_users_recycler_lists);
+        layoutAddUser = findViewById(R.id.activity_group_settings_add_new_user_layout);
+        layoutLeave = findViewById(R.id.activity_group_settings_leave_group_layout);
+        layoutClearChats = findViewById(R.id.activity_group_settings_clear_chats_layout);
+
+        dialog = new ProgressDialog(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
         list = new ArrayList<>();
@@ -147,6 +149,32 @@ public class GroupChatSettings extends AppCompatActivity implements GroupChatSet
         }
 
         getMembers();
+
+        layoutLeave.setOnClickListener(view -> {
+            confirmLeaveDialog();
+        });
+    }
+
+    private void confirmLeaveDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Leave Group")
+                .setMessage("You won't be able send or receive messages in this group again, until the admin adds you back.")
+                .setCancelable(true)
+                .setNegativeButton("Cancel", (dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                })
+                .setPositiveButton("OK", ((dialogInterface, i) ->{
+                    leaveGroup();
+                })).create()
+                .show();
+    }
+
+    private void leaveGroup() {
+        dialog.setTitle("Leaving...");
+        dialog.setMessage("Please wait");
+        dialog.setCancelable(false);
+        dialog.show();
+
     }
 
     private void getMembers() {
@@ -154,10 +182,14 @@ public class GroupChatSettings extends AppCompatActivity implements GroupChatSet
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 admin = dataSnapshot.child("admin").getValue(String.class);
-                if(SharedPref.getInstance(GroupChatSettings.this).getId().equals(admin))
+                if(SharedPref.getInstance(GroupChatSettings.this).getId().equals(admin)) {
                     imgUpload.setVisibility(View.VISIBLE);
-                else
+                    layoutAddUser.setVisibility(View.VISIBLE);
+                }
+                else {
                     imgUpload.setVisibility(View.INVISIBLE);
+                    layoutAddUser.setVisibility(View.GONE);
+                }
                 GenericTypeIndicator<List<String>> genericTypeIndicator = new GenericTypeIndicator<List<String>>(){};
                 userIDs = dataSnapshot.child("members").getValue(genericTypeIndicator);
                 userIDs.add(admin);
@@ -263,5 +295,10 @@ public class GroupChatSettings extends AppCompatActivity implements GroupChatSet
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.chat_settings_menu, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onMenuOpened(int featureId, Menu menu) {
+        return super.onMenuOpened(featureId, menu);
     }
 }

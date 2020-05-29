@@ -119,8 +119,23 @@
                 android:id="@+id/activity_chat_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
+                android:layout_above="@+id/activity_chat_text_user_blocked"
                 android:layout_marginBottom="-1dp" />
+            <TextView
+                android:drawableStart="@drawable/ic_block_black_24dp"
+                android:drawablePadding="10dp"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:visibility="invisible"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/activity_chat_text_user_blocked"
+                android:text="User Blocked"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:textSize="17sp"
+                android:fontFamily="@font/rokkitt_regular"
+                android:textColor="@color/colorPrimary"/>
         </RelativeLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

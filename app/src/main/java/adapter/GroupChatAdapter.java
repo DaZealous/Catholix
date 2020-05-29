@@ -358,11 +358,12 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
 
     class viewHolder extends RecyclerView.ViewHolder {
 
-        LinearLayout adminLinear;
+        LinearLayout adminLinear, otherLinear;
         RelativeLayout userLinear, imgLayout1, imgLayout2;
         CardView imgUser, imgAdmin, textAdminCard, textUserCard, cardAdminAudio, cardUserAudio, cardUserFile, cardAdminFile, cardUserContact, cardAdminContact;
         TextView textUser, textAdmin, adminTime, userTime, imgChatUserTime, imgChatAdminTime, adminAudioTime, userAudioTime,
-                imgOtherUser, textOtherUser, audioOtherUser, textUserFile, textUserFileTime, textAdminFile, textAdminFileTime, textUserContact, textUserContactTime, textAdminContact, textAdminContactTime, textAdminFileUser, textAdminContactUser;
+                imgOtherUser, textOtherUser, audioOtherUser, textUserFile, textUserFileTime, textAdminFile, textAdminFileTime, textUserContact, textUserContactTime,
+                textAdminContact, textAdminContactTime, textAdminFileUser, textAdminContactUser, otherTxtMsg;
         ImageView chatAdminImg, chatUserImg, userFileImage, adminFileImage;
         ImageButton adminAudioPlayBtn, userAudioPlayBtn, adminPlayVideoBtn, userPlayVideoBtn;
         SeekBar adminAudioSeekBar, userAudioSeekBar;
@@ -420,6 +421,8 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
             adminContactBtnView = itemView.findViewById(R.id.chat_admin_contact_view_btn);
             textAdminFileUser = itemView.findViewById(R.id.chat_admin_file_text_user);
             textAdminContactUser = itemView.findViewById(R.id.chat_admin_contact_text_user);
+            otherLinear = itemView.findViewById(R.id.chat_layout_other_text_layout);
+            otherTxtMsg = itemView.findViewById(R.id.chat_layout_other_text_view_msg);
         }
 
         private void setTextUser(String text) {
@@ -451,6 +454,7 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
         @RequiresApi(api = Build.VERSION_CODES.O)
         private void checkType(String msg_type, String img, String msg_name) {
             if (msg_type.equalsIgnoreCase("text")) {
+                otherLinear.setVisibility(View.GONE);
                 textAdminCard.setVisibility(View.VISIBLE);
                 textUserCard.setVisibility(View.VISIBLE);
                 imgAdmin.setVisibility(View.GONE);
@@ -462,6 +466,7 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
                 cardAdminContact.setVisibility(View.GONE);
                 cardUserContact.setVisibility(View.GONE);
             } else if (msg_type.equalsIgnoreCase("image")) {
+                otherLinear.setVisibility(View.GONE);
                 Glide.with(context).load(img).into(chatAdminImg);
                 Glide.with(context).load(img).into(chatUserImg);
                 imgAdmin.setVisibility(View.VISIBLE);
@@ -477,6 +482,7 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
                 cardAdminContact.setVisibility(View.GONE);
                 cardUserContact.setVisibility(View.GONE);
             } else if (msg_type.equalsIgnoreCase("video")) {
+                otherLinear.setVisibility(View.GONE);
                 imgAdmin.setVisibility(View.VISIBLE);
                 imgUser.setVisibility(View.VISIBLE);
                 textAdminCard.setVisibility(View.GONE);
@@ -505,6 +511,7 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
                 }
 
             } else if (msg_type.equalsIgnoreCase("file")) {
+                otherLinear.setVisibility(View.GONE);
                 imgAdmin.setVisibility(View.GONE);
                 imgUser.setVisibility(View.GONE);
                 textAdminCard.setVisibility(View.GONE);
@@ -529,6 +536,7 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
                     Glide.with(context).load(img).placeholder(R.drawable.ic_insert_drive_file_white_24dp).into(adminFileImage);
                 }
             } else if (msg_type.equalsIgnoreCase("contact")) {
+                otherLinear.setVisibility(View.GONE);
                 imgAdmin.setVisibility(View.GONE);
                 imgUser.setVisibility(View.GONE);
                 textAdminCard.setVisibility(View.GONE);
@@ -543,7 +551,8 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
                 textUserContact.setText(msg_name);
                 textAdminContact.setText(msg_name);
 
-            } else {
+            } else if (msg_type.equalsIgnoreCase("audio")){
+                otherLinear.setVisibility(View.GONE);
                 textAdminCard.setVisibility(View.GONE);
                 textUserCard.setVisibility(View.GONE);
                 imgAdmin.setVisibility(View.GONE);
@@ -563,6 +572,21 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
                     userAudioPlayBtn.setImageResource(R.drawable.ic_file_download_white_24dp);
                     adminAudioPlayBtn.setImageResource(R.drawable.ic_file_download_white_24dp);
                 }
+            }else{
+                otherLinear.setVisibility(View.VISIBLE);
+                textAdminCard.setVisibility(View.GONE);
+                textUserCard.setVisibility(View.GONE);
+                imgAdmin.setVisibility(View.GONE);
+                imgUser.setVisibility(View.GONE);
+                cardUserAudio.setVisibility(View.GONE);
+                cardAdminAudio.setVisibility(View.GONE);
+                cardAdminFile.setVisibility(View.GONE);
+                cardUserFile.setVisibility(View.GONE);
+                cardAdminContact.setVisibility(View.GONE);
+                cardUserContact.setVisibility(View.GONE);
+
+                if(img.equals("remove"))
+
             }
         }
 

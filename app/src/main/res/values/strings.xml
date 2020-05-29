@@ -117,4 +117,9 @@
     <string name="logout">Log out</string>
     <string name="mute_notifications">Mute Notifications</string>
     <string name="un_mute_notifications">Un Mute Notifications</string>
+    <string name="add_member">add member</string>
+    <string name="clear_chats">Clear Chats</string>
+    <string name="leave_group">Leave Group</string>
+    <string name="add_new_user">Add New User</string>
+    <string name="group_members">Group Members :</string>
 </resources>

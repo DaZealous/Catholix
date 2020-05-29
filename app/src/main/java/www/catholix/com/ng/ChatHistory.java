@@ -27,13 +27,14 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import adapter.ChatHistoryAdapter;
 import config.SharedPref;
 import model.ChatHistoryModel;
 import model.Conv;
 
-public class ChatHistory extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener{
+public class ChatHistory extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     Toolbar toolbar;
     List<String> list;
@@ -46,6 +47,7 @@ public class ChatHistory extends AppCompatActivity implements SwipeRefreshLayout
     private DatabaseReference mUsersDatabase;
     private String mCurrent_user_id;
     FloatingActionButton floatingActionButton;
+    DataSnapshot snapshot;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,12 +83,13 @@ public class ChatHistory extends AppCompatActivity implements SwipeRefreshLayout
         convs = new ArrayList<>();
         mConvList.setHasFixedSize(true);
         mConvList.setLayoutManager(linearLayoutManager);
-        adapter = new ChatHistoryAdapter(list, convs,this);
+        adapter = new ChatHistoryAdapter(list, convs, this);
         mConvList.setAdapter(adapter);
 
         floatingActionButton.setOnClickListener(view ->
-            startActivity(new Intent(this, UsersActivity.class))
+                startActivity(new Intent(this, UsersActivity.class))
         );
+
     }
 
     @Override
@@ -106,18 +109,36 @@ public class ChatHistory extends AppCompatActivity implements SwipeRefreshLayout
 
         conversationQuery.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.hasChildren()) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot1) {
+                if (dataSnapshot1.hasChildren()) {
                     list.clear();
                     convs.clear();
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            if (snapshot.child("time_stamp").getValue(Long.class) != null) {
-                                list.add(snapshot.getKey());
-                                convs.add(snapshot.getValue(Conv.class));
-                    }
-                    }
-                    swipeRefreshLayout.setRefreshing(false);
-                    adapter.notifyDataSetChanged();
+                    mMessageDatabase.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot2) {
+                            for (DataSnapshot snap : dataSnapshot1.getChildren()) {
+                                if (snap.getKey().matches("\\d+")) {
+                                    if(dataSnapshot2.child(Objects.requireNonNull(snap.getKey())).exists())
+                                    if (snap.child("time_stamp").getValue(Long.class) != null) {
+                                        list.add(snap.getKey());
+                                        convs.add(snap.getValue(Conv.class));
+                                    }
+                                }else{
+                                    if (snap.child("time_stamp").getValue(Long.class) != null) {
+                                        list.add(snap.getKey());
+                                        convs.add(snap.getValue(Conv.class));
+                                    }
+                                }
+                            }
+                            swipeRefreshLayout.setRefreshing(false);
+                            adapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
                 }
             }
 
@@ -138,12 +159,12 @@ public class ChatHistory extends AppCompatActivity implements SwipeRefreshLayout
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-        switch (id){
+        switch (id) {
             case R.id.chat_history_create_group_id:
                 createGroup();
                 return true;
-                default:
-                    return false;
+            default:
+                return false;
         }
     }
 
@@ -153,7 +174,7 @@ public class ChatHistory extends AppCompatActivity implements SwipeRefreshLayout
 
     @Override
     public void onRefresh() {
-       loadHistory();
+        loadHistory();
     }
 
 

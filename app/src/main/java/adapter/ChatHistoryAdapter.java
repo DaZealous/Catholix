@@ -63,6 +63,7 @@ public class ChatHistoryAdapter extends RecyclerView.Adapter<ChatHistoryAdapter.
         holder.textTyping.setVisibility(View.GONE);
         holder.textMessage.setVisibility(View.VISIBLE);
         holder.textOnline.setVisibility(View.GONE);
+        holder.textMessage.setText("");
         DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference().child("messages").child(SharedPref.getInstance(context).getId()).child(id);
         Query messageQuery = chatRef.limitToLast(1);
         DatabaseReference mUsersDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(id);

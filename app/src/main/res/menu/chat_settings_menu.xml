@@ -2,9 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:title="Block User"/>
+        android:title="Add New User"/>
     <item
-        android:title="Add User"/>
-    <item
-        android:title="Delete Group"/>
+        android:title="Clear Chat"/>
 </menu>

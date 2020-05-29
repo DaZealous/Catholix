@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Intent;
@@ -70,6 +71,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import adapter.ChatAdapter;
 import adapter.MyAdapter;
@@ -103,7 +105,7 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
     String mPrevKey = "";
     StorageReference mImageStorage;
     private LinearLayoutManager mLinearLayout;
-    TextView textUsername, textTimeStamp;
+    TextView textUsername, textTimeStamp, textUserBlocked;
     private LinearLayout chooseFileLayout;
     private boolean isChooseFileVisible;
     Animation slideLeft, slideRight;
@@ -114,6 +116,7 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
     String outputFile, online;
     private File rootFile;
     String dir, fileName;
+    boolean isBlock, isUserBlock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +150,7 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
             btnContactPick = findViewById(R.id.activity_chat_contact_file_pick);
             chatBackImg = findViewById(R.id.activity_chat_img_back);
             popUpMenuBtn = findViewById(R.id.activity_chat_menu_options);
+            textUserBlocked = findViewById(R.id.activity_chat_text_user_blocked);
 
             if (new ChatDatabase(this).findChatImage("1") == null)
                 chatBackImg.setImageResource(R.drawable.chat_back_img);
@@ -238,11 +242,33 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
             });
             loadMessages();
 
-            rootRef.child("Chat").child(userID).child(otherUser).child("typing").addValueEventListener(new ValueEventListener() {
+            rootRef.child("Chat").child(userID).child(otherUser).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
 
-                    String typing = dataSnapshot.getValue(String.class);
+                    String typing = dataSnapshot.child("typing").getValue(String.class);
+
+                    if (dataSnapshot.child("is_block").exists())
+                        isBlock = dataSnapshot.child("is_block").getValue(Boolean.class);
+                    else
+                        isBlock = false;
+
+                    if (isBlock) {
+                        editText.setEnabled(false);
+                        editText.setAlpha(0.5f);
+                        imgAttach.setEnabled(false);
+                        btnSend.setEnabled(false);
+                        btnSend.setAlpha(0.5f);
+                        textUserBlocked.setText("You have been blocked by this user");
+                        textUserBlocked.setVisibility(View.VISIBLE);
+                    } else {
+                        editText.setEnabled(true);
+                        editText.setAlpha(1f);
+                        imgAttach.setEnabled(true);
+                        btnSend.setEnabled(true);
+                        btnSend.setAlpha(1f);
+                        textUserBlocked.setVisibility(View.INVISIBLE);
+                    }
 
                     if (!TextUtils.isEmpty(typing))
                         if (typing.equals("true")) {
@@ -256,6 +282,39 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
                                 textTimeStamp.setText("");
                         }
 
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+            rootRef.child("Chat").child(otherUser).child(userID).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    if (dataSnapshot.child("is_block").exists())
+                    isUserBlock = dataSnapshot.child("is_block").getValue(Boolean.class);
+                    else
+                        isUserBlock = false;
+
+                    /*if (isUserBlock) {
+                        editText.setEnabled(false);
+                        editText.setAlpha(0.5f);
+                        imgAttach.setEnabled(false);
+                        btnSend.setEnabled(false);
+                        btnSend.setAlpha(0.5f);
+                        textUserBlocked.setText("You block this user");
+                        textUserBlocked.setVisibility(View.VISIBLE);
+                    } else {
+                        editText.setEnabled(true);
+                        editText.setAlpha(1f);
+                        imgAttach.setEnabled(true);
+                        btnSend.setEnabled(true);
+                        btnSend.setAlpha(1f);
+                        textUserBlocked.setVisibility(View.INVISIBLE);
+                    }*/
                 }
 
                 @Override
@@ -387,10 +446,10 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
             });
 
             btnVideoPick.setOnClickListener(view -> {
-               chooseFileLayout.setVisibility(View.GONE);
-               Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-               intent.setType("video/*");
-               startActivityForResult(intent, VIDEO_RESULT);
+                chooseFileLayout.setVisibility(View.GONE);
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("video/*");
+                startActivityForResult(intent, VIDEO_RESULT);
             });
 
             btnDocumentPick.setOnClickListener(view -> {
@@ -420,15 +479,102 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
             });
 
             popUpMenuBtn.setOnClickListener(view -> {
-                PopupMenu pop = new PopupMenu(this, popUpMenuBtn);
-                pop.inflate(R.menu.chat_activity_menu);
-//                pop.setOnMenuItemClickListener(item ->
-//                    );
-                pop.show();
+                CharSequence options[] = new CharSequence[]{isUserBlock ? "Unblock User" : "Block User", "Clear Chats", "Delete Conversations"};
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+                builder.setTitle("Select Options");
+                builder.setItems(options, ((dialogInterface, i) -> {
+                    switch (i) {
+                        case 0:
+                            blockUser();
+                            break;
+                        case 1:
+                            clearChats();
+                            break;
+                        case 2:
+                            deleteConv();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                ));
+                builder.show();
             });
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void deleteConv() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle("Delete Conversations")
+                .setMessage("All your conversations including chat history will be deleted")
+                .setNegativeButton("Cancel", ((dialogInterface, i) ->
+                        dialogInterface.dismiss()))
+                .setPositiveButton("OK", ((dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                    ProgressDialog dialog = new ProgressDialog(this);
+                    dialog.setTitle("Deleting Conversations...");
+                    dialog.setMessage("please wait");
+                    dialog.setCancelable(false);
+                    dialog.show();
+                    rootRef.child("messages").child(userID).child(otherUser).removeValue().addOnCompleteListener((task -> {
+                        if (task.isSuccessful()) {
+                            finish();
+                            dialog.dismiss();
+                            Toast.makeText(this, "Deleted successfully", Toast.LENGTH_SHORT).show();
+                        }
+                    }));
+                }));
+        builder.create().show();
+    }
+
+    private void clearChats() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle("Clear Chats")
+                .setMessage("All your conversations will be cleared")
+                .setNegativeButton("Cancel", ((dialogInterface, i) ->
+                        dialogInterface.dismiss()))
+                .setPositiveButton("OK", ((dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                    ProgressDialog dialog = new ProgressDialog(this);
+                    dialog.setTitle("Clearing Chats...");
+                    dialog.setMessage("please wait");
+                    dialog.setCancelable(false);
+                    dialog.show();
+                    rootRef.child("messages").child(userID).child(otherUser).removeValue().addOnCompleteListener((task -> {
+                        if (task.isSuccessful()) {
+                            loadMessages();
+                            dialog.dismiss();
+                            Toast.makeText(this, "Chats cleared successfully", Toast.LENGTH_SHORT).show();
+                        }
+                    }));
+                }));
+        builder.create().show();
+    }
+
+    private void blockUser() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(isUserBlock ? "Unblock User?" : "Block User?")
+                .setMessage("Sure to continue?")
+                .setNegativeButton("Cancel", ((dialogInterface, i) ->
+                        dialogInterface.dismiss()))
+                .setPositiveButton("Sure", ((dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                    ProgressDialog dialog = new ProgressDialog(this);
+                    dialog.setTitle(isUserBlock ? "Unblocking..." : "Blocking...");
+                    dialog.setMessage("please wait");
+                    dialog.setCancelable(false);
+                    dialog.show();
+                    rootRef.child("Chat").child(otherUser).child(userID).child("is_block").setValue(!isUserBlock).addOnCompleteListener((task -> {
+                        if (task.isSuccessful()) {
+                            dialog.dismiss();
+                            Toast.makeText(this, isUserBlock ? "User unblocked successfully" : "User blocked successfully", Toast.LENGTH_SHORT).show();
+                        }
+                    }));
+                }));
+        builder.create().show();
     }
 
     private void sendContact(ContactModel model) {
@@ -481,11 +627,10 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
     public List<ContactModel> getContacts() {
-            List<ContactModel> list = new ArrayList<>();
-        Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,null,null, null);
-        while (phones.moveToNext())
-        {
-            String name= phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+        List<ContactModel> list = new ArrayList<>();
+        Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
+        while (phones.moveToNext()) {
+            String name = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
             String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
             ContactModel model = new ContactModel();
             model.mobileNumber = phoneNumber;
@@ -493,8 +638,8 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
             list.add(model);
         }
         phones.close();
-            return list;
-        }
+        return list;
+    }
 
     private void sendAudio(Uri uri) {
         bar.setVisibility(View.VISIBLE);
@@ -615,6 +760,7 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
         });
 
     }
+
     private void startRecording() {
         isRecording = true;
         btnSend.setImageResource(R.drawable.ic_pause_white_24dp);
@@ -746,6 +892,7 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
 
             }
         });
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
@@ -767,25 +914,25 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
                 Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == AUDIO_RESULT && resultCode == RESULT_OK) {
-                Uri audioUri = data.getData();
-                if (audioUri != null) {
-                    dir = audioUri.getPath();
-                    File file = new File(getFilePath(audioUri, new String[]{MediaStore.Audio.Media.DATA}));
-                    fileName = file.getName();
-                    if (getFileSize(audioUri, new String[]{OpenableColumns.SIZE}) > 5)
-                        Toast.makeText(this, "you cannot send audio file greater than 5mb", Toast.LENGTH_SHORT).show();
-                    else {
-                        String dirDest = rootFile.getAbsolutePath() + "/Catholix/";
-                        try {
-                            saveFile(file, new File(dirDest));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                       sendAudio(audioUri);
-                       // Toast.makeText(this, fileName, Toast.LENGTH_LONG).show();
+            Uri audioUri = data.getData();
+            if (audioUri != null) {
+                dir = audioUri.getPath();
+                File file = new File(getFilePath(audioUri, new String[]{MediaStore.Audio.Media.DATA}));
+                fileName = file.getName();
+                if (getFileSize(audioUri, new String[]{OpenableColumns.SIZE}) > 5)
+                    Toast.makeText(this, "you cannot send audio file greater than 5mb", Toast.LENGTH_SHORT).show();
+                else {
+                    String dirDest = rootFile.getAbsolutePath() + "/Catholix/";
+                    try {
+                        saveFile(file, new File(dirDest));
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
+                    sendAudio(audioUri);
+                    // Toast.makeText(this, fileName, Toast.LENGTH_LONG).show();
                 }
-        }else if(requestCode == VIDEO_RESULT && resultCode == RESULT_OK){
+            }
+        } else if (requestCode == VIDEO_RESULT && resultCode == RESULT_OK) {
             Uri videoUri = data.getData();
             if (videoUri != null) {
                 dir = videoUri.getPath();
@@ -800,10 +947,10 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                   sendVideo(videoUri);
+                    sendVideo(videoUri);
                 }
             }
-        }else if(requestCode == DOC_RESULT && resultCode == RESULT_OK){
+        } else if (requestCode == DOC_RESULT && resultCode == RESULT_OK) {
             Uri docUri = data.getData();
             if (docUri != null) {
                 dir = docUri.getPath();
@@ -888,7 +1035,7 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
         FileUtils.copyFileToDirectory(src, dst);
     }
 
-    private String getFilePath(Uri uri, String[] filePathColumn){
+    private String getFilePath(Uri uri, String[] filePathColumn) {
         Cursor cursor = getContentResolver().query(uri, filePathColumn, null, null, null);
         cursor.moveToFirst();
         int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
@@ -897,7 +1044,7 @@ public class ChatActivity extends AppCompatActivity implements SwipeRefreshLayou
         return picturePath;
     }
 
-    private long getFileSize(Uri uri, String[] filePathColumn){
+    private long getFileSize(Uri uri, String[] filePathColumn) {
         Cursor cursor = getContentResolver().query(uri, filePathColumn, null, null, null);
         cursor.moveToFirst();
         int size = cursor.getColumnIndex(filePathColumn[0]);
