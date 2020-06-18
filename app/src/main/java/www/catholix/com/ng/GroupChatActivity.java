@@ -47,6 +47,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
@@ -107,6 +108,7 @@ public class GroupChatActivity extends AppCompatActivity implements SwipeRefresh
     String dir, fileName;
     RelativeLayout relativeLayout;
     TextView textUserAdded;
+    private List<String> userIDs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,6 +167,8 @@ public class GroupChatActivity extends AppCompatActivity implements SwipeRefresh
         outputFile = Environment.getExternalStorageDirectory().getAbsolutePath();
         online = "";
         admin = "";
+
+        userIDs = new ArrayList<>();
 
         relativeLayout.setOnClickListener(view -> {
             ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this,
@@ -278,7 +282,6 @@ public class GroupChatActivity extends AppCompatActivity implements SwipeRefresh
 
             }
         });
-        loadMessages();
 
         editText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -310,6 +313,35 @@ public class GroupChatActivity extends AppCompatActivity implements SwipeRefresh
             } else {
                 imgAttach.startAnimation(slideLeft);
                 rootRef.child("Chat").child(otherUser).child("typing").setValue(null);
+            }
+        });
+
+       rootRef.child("Users").child(otherUser).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                admin = dataSnapshot.child("admin").getValue(String.class);
+                GenericTypeIndicator<List<String>> genericTypeIndicator = new GenericTypeIndicator<List<String>>(){};
+                userIDs = dataSnapshot.child("members").getValue(genericTypeIndicator);
+                userIDs.add(admin);
+                if(userIDs.contains(SharedPref.getInstance(GroupChatActivity.this).getId())){
+                    editText.setEnabled(true);
+                    editText.setAlpha(1f);
+                    imgAttach.setEnabled(true);
+                    btnSend.setEnabled(true);
+                    btnSend.setAlpha(1f);
+                }else{
+                    editText.setEnabled(false);
+                    editText.setAlpha(0.5f);
+                    imgAttach.setEnabled(false);
+                    btnSend.setEnabled(false);
+                    btnSend.setAlpha(0.5f);
+                }
+                loadMessages();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
             }
         });
 
@@ -565,7 +597,13 @@ public class GroupChatActivity extends AppCompatActivity implements SwipeRefresh
 
                     }
 
-                    list.add(message);
+                    if(!userIDs.contains(userID)) {
+                        if (!message.getMsg_type().equals("left") && !message.getFrom().equals(userID))
+                            list.add(message);
+                    }
+                    else{
+                        list.add(message);
+                    }
                     adapter.notifyDataSetChanged();
                     recyclerView.scrollToPosition(adapter.getItemCount() - 1);
                     swipeRefreshLayout.setRefreshing(false);
@@ -965,7 +1003,13 @@ public class GroupChatActivity extends AppCompatActivity implements SwipeRefresh
 
                     if (!mPrevKey.equals(messageKey)) {
 
-                        list.add(itemPos++, message);
+                        if(!userIDs.contains(userID)) {
+                            if (!message.getMsg_type().equals("left") && !message.getFrom().equals(userID))
+                                list.add(itemPos++, message);
+                        }
+                        else{
+                            list.add(itemPos++, message);
+                        }
 
                     } else {
 

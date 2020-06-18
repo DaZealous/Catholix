@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -35,6 +34,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -42,7 +42,11 @@ import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import Service.UserService;
 import adapter.MembersListAdapter;
 import api.RetrofitClient;
@@ -56,9 +60,9 @@ import view.GroupChatSettingsView;
 public class GroupChatSettings extends AppCompatActivity implements GroupChatSettingsView {
 
     Toolbar toolbar;
-    String img_url, username, chat_id, admin;
+    String img_url, username, chat_id, admin, userId;
     ImageView profileImgView;
-    ImageButton imgUpload;
+    ImageButton imgUpload, btnAddMember;
     private Uri resultUri;
     DatabaseReference rootRef;
     FirebaseDatabase firebaseDatabase;
@@ -69,7 +73,7 @@ public class GroupChatSettings extends AppCompatActivity implements GroupChatSet
     List<String> userIDs;
     ProgressBar membersBar;
     UserService service;
-    CardView layoutAddUser, layoutLeave, layoutClearChats;
+    CardView layoutLeave;
     ProgressDialog dialog;
 
     @Override
@@ -88,9 +92,8 @@ public class GroupChatSettings extends AppCompatActivity implements GroupChatSet
         bar = findViewById(R.id.activity_group_settings_progress_bar_img);
         membersBar = findViewById(R.id.activity_group_settings_users_list_bar);
         recyclerView = findViewById(R.id.activity_group_settings_users_recycler_lists);
-        layoutAddUser = findViewById(R.id.activity_group_settings_add_new_user_layout);
         layoutLeave = findViewById(R.id.activity_group_settings_leave_group_layout);
-        layoutClearChats = findViewById(R.id.activity_group_settings_clear_chats_layout);
+        btnAddMember = findViewById(R.id.activity_group_settings_img_btn_add_member);
 
         dialog = new ProgressDialog(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -108,6 +111,7 @@ public class GroupChatSettings extends AppCompatActivity implements GroupChatSet
 
         resultUri = null;
         admin = "";
+        userId = SharedPref.getInstance(this).getId();
 
         firebaseDatabase = FirebaseDatabase.getInstance();
         rootRef = firebaseDatabase.getReference();
@@ -124,6 +128,14 @@ public class GroupChatSettings extends AppCompatActivity implements GroupChatSet
                         .setMinCropWindowSize(500, 500)
                         .start(this);
 
+        });
+
+        btnAddMember.setOnClickListener(view -> {
+            if(isInternetAvailable(this))
+            startActivity(new Intent(this, AddNewMember.class).putExtra("id", chat_id).putExtra("username", username)
+            .putExtra("userIDs", userIDs.toArray(new String[0])));
+            else
+                Toast.makeText(this, "no internet", Toast.LENGTH_SHORT).show();
         });
 
         try {
@@ -175,20 +187,71 @@ public class GroupChatSettings extends AppCompatActivity implements GroupChatSet
         dialog.setCancelable(false);
         dialog.show();
 
+        userIDs.remove(userId);
+
+        rootRef.child("Users").child(chat_id).child("admin").setValue(admin.equals(userId)?userIDs.get(0):admin);
+        rootRef.child("Users").child(chat_id).child("members").setValue(Arrays.asList(userIDs.toArray()));
+
+        String current_user_ref = "messages/" + userId + "/" + chat_id;
+        String chat_user_ref = "messages/" + chat_id;
+
+        DatabaseReference user_message_push = rootRef.child("messages")
+                .child(userId).child(chat_id).push();
+
+        final String push_id = user_message_push.getKey();
+
+        Map messageMap = new HashMap();
+        messageMap.put("msg_body", " left the group");
+        messageMap.put("key", push_id);
+        messageMap.put("seen", false);
+        messageMap.put("isRead", false);
+        messageMap.put("msg_type", "left");
+        messageMap.put("time_stamp", ServerValue.TIMESTAMP);
+        messageMap.put("from", userId);
+        messageMap.put("to", chat_id);
+        messageMap.put("msg_name", "You left");
+        messageMap.put("fromUsername", SharedPref.getInstance(this).getUser());
+        messageMap.put("toUsername", chat_id);
+
+        Map messageUserMap = new HashMap();
+        messageUserMap.put(current_user_ref + "/" + push_id, messageMap);
+        messageUserMap.put(chat_user_ref + "/" + push_id, messageMap);
+
+        rootRef.child("Chat").child(userId).child(chat_id).child("seen").setValue(true);
+
+        rootRef.child("Chat").child(userId).child(chat_id).child("time_stamp").setValue(ServerValue.TIMESTAMP);
+
+        rootRef.child("Chat").child(chat_id).child(userId).child("seen").setValue(false);
+        rootRef.child("Chat").child(chat_id).child(userId).child("time_stamp").setValue(ServerValue.TIMESTAMP);
+
+
+        rootRef.updateChildren(messageUserMap, (databaseError, databaseReference) -> {
+
+            if (databaseError == null) {
+
+                rootRef.child("messages").child(userId).child(chat_id).child(push_id).child("seen").setValue(true);
+                rootRef.child("messages").child(userId).child(chat_id).child(push_id).child("isRead").setValue(true);
+
+                dialog.dismiss();
+                finish();
+            }
+
+        });
+
     }
 
     private void getMembers() {
-        FirebaseDatabase.getInstance().getReference().child("Users").child(chat_id).addValueEventListener(new ValueEventListener() {
+        firebaseDatabase.getReference().child("Users").child(chat_id).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 admin = dataSnapshot.child("admin").getValue(String.class);
-                if(SharedPref.getInstance(GroupChatSettings.this).getId().equals(admin)) {
+                if(userId.equals(admin)) {
                     imgUpload.setVisibility(View.VISIBLE);
-                    layoutAddUser.setVisibility(View.VISIBLE);
+                    btnAddMember.setVisibility(View.VISIBLE);
                 }
                 else {
                     imgUpload.setVisibility(View.INVISIBLE);
-                    layoutAddUser.setVisibility(View.GONE);
+                    btnAddMember.setVisibility(View.GONE);
                 }
                 GenericTypeIndicator<List<String>> genericTypeIndicator = new GenericTypeIndicator<List<String>>(){};
                 userIDs = dataSnapshot.child("members").getValue(genericTypeIndicator);
@@ -289,12 +352,6 @@ public class GroupChatSettings extends AppCompatActivity implements GroupChatSet
     @Override
     public String getId() {
         return admin;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.chat_settings_menu, menu);
-        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

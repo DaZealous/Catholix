@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -27,6 +29,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
+
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,9 +102,9 @@ public class CreateGroup extends AppCompatActivity implements SelectUserView {
             if (TextUtils.isEmpty(editGroupName.getText().toString()) || users.size() == 0) {
                 Toast.makeText(this, "all fields are required", Toast.LENGTH_SHORT).show();
             } else {
-                if(resultUri != null)
-                uploadImage();
-                else{
+                if (resultUri != null)
+                    uploadImage();
+                else {
                     dialog.show();
                     groupRef = rootRef.child("Users").push();
                     push_id = groupRef.getKey();
@@ -111,15 +114,15 @@ public class CreateGroup extends AppCompatActivity implements SelectUserView {
         });
 
         circleImageView.setOnClickListener(view ->
-            CropImage.activity(resultUri)
-                    .setAspectRatio(1, 1)
-                    .setMinCropWindowSize(500, 500)
-                    .start(this));
+                CropImage.activity(resultUri)
+                        .setAspectRatio(1, 1)
+                        .setMinCropWindowSize(500, 500)
+                        .start(this));
         loadUsers();
     }
 
     private void uploadImage() {
-       // File thumb_filePath = new File(resultUri.getPath());
+        // File thumb_filePath = new File(resultUri.getPath());
         dialog.setTitle("Uploading Image");
         dialog.show();
         groupRef = rootRef.child("Users").push();
@@ -140,7 +143,7 @@ public class CreateGroup extends AppCompatActivity implements SelectUserView {
         UploadTask uploadTask = filepath.putBytes(thumb_byte);
 
         uploadTask.addOnCompleteListener(task -> {
-            if(task.isSuccessful()){
+            if (task.isSuccessful()) {
                 filepath.getDownloadUrl().addOnSuccessListener(uri -> createGroup(uri));
             }
         });
@@ -170,7 +173,7 @@ public class CreateGroup extends AppCompatActivity implements SelectUserView {
         Map GroupMap = new HashMap();
         GroupMap.put("username", editGroupName.getText().toString());
         GroupMap.put("admin", SharedPref.getInstance(this).getId());
-        GroupMap.put("img_url", (uri != null)?uri.toString():"");
+        GroupMap.put("img_url", (uri != null) ? uri.toString() : "");
         GroupMap.put("created_at", System.currentTimeMillis());
         GroupMap.put("members", Arrays.asList(users.toArray()));
 
@@ -188,7 +191,7 @@ public class CreateGroup extends AppCompatActivity implements SelectUserView {
                     String user = users.get(i);
                     rootRef.child("Chat").child(user).child(push_id).updateChildren(ChatMap, ((dbError, dbReference) -> {
                     }));
-                    if(i == users.size() - 1){
+                    if (i == users.size() - 1) {
                         rootRef.child("Chat").child(SharedPref.getInstance(CreateGroup.this).getId()).child(push_id).updateChildren(ChatMap,
                                 ((dbError2, dbRef2) -> {
                                     Toast.makeText(this, "group created successfully", Toast.LENGTH_SHORT).show();
@@ -198,7 +201,7 @@ public class CreateGroup extends AppCompatActivity implements SelectUserView {
                                 }));
                     }
                 }
-            }else{
+            } else {
                 dialog.dismiss();
                 Toast.makeText(this, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }

@@ -14,7 +14,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.text.Html;
+import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.text.style.URLSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,7 +87,7 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
 
         ChatDao dao = list.get(position);
         holder.checkUser(dao.getFrom());
-        holder.checkType(dao.getMsg_type(), dao.getMsg_body(), dao.getMsg_name());
+        holder.checkType(dao.getMsg_type(), dao.getMsg_body(), dao.getMsg_name(), dao);
         holder.setTextAdmin(dao.getMsg_body());
         holder.setTextUser(dao.getMsg_body());
         holder.setTextUserTime(Long.toString(dao.getTime_stamp()));
@@ -106,7 +111,7 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
         handler = new Handler();
 
         holder.imgLayout1.setOnClickListener(view -> {
-            if(dao.getMsg_type().equalsIgnoreCase("image")) {
+            if (dao.getMsg_type().equalsIgnoreCase("image")) {
                 if (holder.chatAdminImg.getDrawable() != null) {
                     Bitmap bitmap = ((BitmapDrawable) holder.chatAdminImg.getDrawable()).getBitmap();
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -115,7 +120,7 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
                     holder.viewImg(thumb_byte, holder.chatAdminImg
                             , dao.getToUsername(), dao.getTime_stamp(), chatsView.getUserPhoto());
                 }
-            }else{
+            } else {
                 File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Catholix/" + dao.getMsg_name());
                 if (file.exists()) {
                     holder.viewVideo(file.getAbsolutePath(),
@@ -128,7 +133,7 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
 
 
         holder.imgLayout2.setOnClickListener(view -> {
-            if(dao.getMsg_type().equalsIgnoreCase("image")) {
+            if (dao.getMsg_type().equalsIgnoreCase("image")) {
                 if (holder.chatUserImg.getDrawable() != null) {
                     Bitmap bitmap = ((BitmapDrawable) holder.chatUserImg.getDrawable()).getBitmap();
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -137,7 +142,7 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
                     holder.viewImg(thumb_byte, holder.chatUserImg
                             , dao.getFromUsername(), dao.getTime_stamp(), chatsView.getUserPhoto());
                 }
-            }else{
+            } else {
                 File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Catholix/" + dao.getMsg_name());
                 if (file.exists()) {
                     holder.viewVideo(file.getAbsolutePath(),
@@ -425,12 +430,36 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
             otherTxtMsg = itemView.findViewById(R.id.chat_layout_other_text_view_msg);
         }
 
+        void makeLinkClickable(SpannableStringBuilder strBuilder, final URLSpan span) {
+            int start = strBuilder.getSpanStart(span);
+            int end = strBuilder.getSpanEnd(span);
+            int flags = strBuilder.getSpanFlags(span);
+            ClickableSpan clickable = new ClickableSpan() {
+                public void onClick(View view) {
+                    Toast.makeText(context, span.getURL(), Toast.LENGTH_SHORT).show();
+                }
+            };
+            strBuilder.setSpan(clickable, start, end, flags);
+            strBuilder.removeSpan(span);
+        }
+
+        void setTextViewHTML(TextView text, String html) {
+            CharSequence sequence = Html.fromHtml(html);
+            SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
+            URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
+            for (URLSpan span : urls) {
+                makeLinkClickable(strBuilder, span);
+            }
+            text.setText(strBuilder);
+            text.setMovementMethod(LinkMovementMethod.getInstance());
+        }
+
         private void setTextUser(String text) {
-            textUser.setText(text);
+            setTextViewHTML(textUser, text);
         }
 
         private void setTextAdmin(String text) {
-            textAdmin.setText(text);
+            setTextViewHTML(textAdmin, text);
         }
 
         private void setTextUserTime(String text) {
@@ -452,7 +481,7 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
         }
 
         @RequiresApi(api = Build.VERSION_CODES.O)
-        private void checkType(String msg_type, String img, String msg_name) {
+        private void checkType(String msg_type, String img, String msg_name, ChatDao dao) {
             if (msg_type.equalsIgnoreCase("text")) {
                 otherLinear.setVisibility(View.GONE);
                 textAdminCard.setVisibility(View.VISIBLE);
@@ -551,7 +580,7 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
                 textUserContact.setText(msg_name);
                 textAdminContact.setText(msg_name);
 
-            } else if (msg_type.equalsIgnoreCase("audio")){
+            } else if (msg_type.equalsIgnoreCase("audio")) {
                 otherLinear.setVisibility(View.GONE);
                 textAdminCard.setVisibility(View.GONE);
                 textUserCard.setVisibility(View.GONE);
@@ -572,7 +601,7 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
                     userAudioPlayBtn.setImageResource(R.drawable.ic_file_download_white_24dp);
                     adminAudioPlayBtn.setImageResource(R.drawable.ic_file_download_white_24dp);
                 }
-            }else{
+            } else {
                 otherLinear.setVisibility(View.VISIBLE);
                 textAdminCard.setVisibility(View.GONE);
                 textUserCard.setVisibility(View.GONE);
@@ -585,7 +614,9 @@ public class GroupChatAdapter extends RecyclerView.Adapter<GroupChatAdapter.view
                 cardAdminContact.setVisibility(View.GONE);
                 cardUserContact.setVisibility(View.GONE);
 
-                if(img.equals("remove"))
+                    otherTxtMsg.setText(dao.getFrom().equals(SharedPref.getInstance(context).getId())
+                            ? dao.getMsg_name()
+                            : dao.getFromUsername() + dao.getMsg_body());
 
             }
         }

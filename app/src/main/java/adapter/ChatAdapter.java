@@ -14,7 +14,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.text.Html;
+import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.text.style.URLSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -418,12 +423,36 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.viewHolder> {
 
         }
 
+        void makeLinkClickable(SpannableStringBuilder strBuilder, final URLSpan span) {
+            int start = strBuilder.getSpanStart(span);
+            int end = strBuilder.getSpanEnd(span);
+            int flags = strBuilder.getSpanFlags(span);
+            ClickableSpan clickable = new ClickableSpan() {
+                public void onClick(View view) {
+                    Toast.makeText(context, span.getURL(), Toast.LENGTH_SHORT).show();
+                }
+            };
+            strBuilder.setSpan(clickable, start, end, flags);
+            strBuilder.removeSpan(span);
+        }
+
+        void setTextViewHTML(TextView text, String html) {
+            CharSequence sequence = Html.fromHtml(html);
+            SpannableStringBuilder strBuilder = new SpannableStringBuilder(sequence);
+            URLSpan[] urls = strBuilder.getSpans(0, sequence.length(), URLSpan.class);
+            for (URLSpan span : urls) {
+                makeLinkClickable(strBuilder, span);
+            }
+            text.setText(strBuilder);
+            text.setMovementMethod(LinkMovementMethod.getInstance());
+        }
+
         private void setTextUser(String text) {
-            textUser.setText(text);
+            setTextViewHTML(textUser, text);
         }
 
         private void setTextAdmin(String text) {
-            textAdmin.setText(text);
+            setTextViewHTML(textAdmin, text);
         }
 
         private void setTextUserTime(String text) {
